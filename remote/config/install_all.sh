@@ -5,3 +5,6 @@ apt install samba
 
 #install nginx
 apt install nginx
+
+# install dependencies
+apt install libssl-dev
