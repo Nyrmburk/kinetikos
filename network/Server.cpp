@@ -1,7 +1,16 @@
 #include <uWS/uWS.h>
+#include "Server.h"
+
 using namespace uWS;
 
-int run() {
+Server::Server() {
+}
+
+Server::~Server() {
+}
+
+void Server::run() {
+
     Hub h;
     std::string response = "Hello!";
 

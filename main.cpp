@@ -7,10 +7,12 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <unistd.h>
 #include "tween/Tween.h"
 #include "tween/Vec3Channel.h"
 #include "robot/Robot.h"
 #include "control/FootControl.h"
+#include "network/Server.h"
 
 using namespace std;
 
@@ -33,9 +35,12 @@ int main(int argc, char** argv) {
         cout << position.x << ", " << position.y << ", " << position.z << endl;
     }
     
-    Robot robot = Robot();
+    Robot robot;
     FootControl footControl = FootControl(6);
     footControl.step(&robot, (float) 3);
+
+    Server server;
+    server.run();
     
     return 0;
 }
