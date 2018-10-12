@@ -73,6 +73,10 @@ setup:
 	git clone git://git.drogon.net/wiringPi $(VENDOR)/wiringPi
 	mkdir -p $(INCLUDE)/wiringPi
 	cp -l $(VENDOR)/wiringPi/wiringPi/*.h $(VENDOR)/include/wiringPi
+	git clone https://github.com/google/flatbuffers.git $(VENDOR)/flatbuffers
+	cd $(VENDOR)/flatbuffers && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make
+	cp -l -r $(VENDOR)/flatbuffers/include/flatbuffers $(VENDOR)/include/
+	#cp -l -r $(VENDOR)/flatbuffers/js $(VENDOR)/js
 
 # platform targets
 .PHONY: arm

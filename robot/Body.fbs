@@ -1,0 +1,17 @@
+struct Bone {
+	length:float;
+	angle:float;
+	range:float;
+}
+
+struct Leg {
+	coxa:Bone;
+	femur:Bone;
+	tibia:Bone;
+}
+
+table Body {
+	legs:[Leg];
+}
+
+root_type Body;
