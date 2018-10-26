@@ -13,6 +13,7 @@
 #include "robot/Robot.h"
 #include "control/FootControl.h"
 #include "network/Server.h"
+#include "helper/SerializableTest.h"
 
 using namespace std;
 
@@ -38,6 +39,20 @@ int main(int argc, char** argv) {
     Robot robot;
     FootControl footControl = FootControl(6);
     footControl.step(&robot, (float) 3);
+
+    Doggo heckin;
+
+    char buffer[128];
+    std::cout << "total bytes: " << heckin.serialize(buffer, 128) << std::endl;
+    heckin.deserialize(buffer, 128);
+    heckin.print();
+
+    std::cout << std::endl;
+
+    Spaceship whoosh;
+    whoosh.serialize(buffer, 128);
+    whoosh.deserialize(buffer, 128);
+    whoosh.passenger.print();
 
     Server server;
     server.run();

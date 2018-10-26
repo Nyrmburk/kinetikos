@@ -1,5 +1,6 @@
 #include <uWS/uWS.h>
 #include "Server.h"
+#include "Protocol.h"
 
 using namespace uWS;
 
@@ -12,10 +13,21 @@ Server::~Server() {
 void Server::run() {
 
     Hub h;
-    std::string response = "Hello!";
+    std::string response = "Hello!"; 
+    Protocol p;
+    
+    std::vector<char> buffer;
 
-    h.onMessage([](WebSocket<SERVER> *ws, char *message, size_t length, OpCode opCode) {
-        ws->send(message, length, opCode);
+    h.onMessage([&p, &buffer](WebSocket<SERVER> *ws, char *message, size_t length, OpCode opCode) {
+        size_t readBytes = 0;
+        
+        try {
+            readBytes = p.handleMessage(message, length, buffer.data(), (size_t)buffer.size());
+        } catch (std::out_of_range e) {
+            ws->close();
+        }
+
+        ws->send(buffer.data(), readBytes, opCode); 
     });
 
     h.onHttpRequest([&](HttpResponse *res, HttpRequest req, char *data, size_t length,
@@ -23,7 +35,7 @@ void Server::run() {
         res->end(response.data(), response.length());
     });
 
-    if (h.listen(3000)) {
+    if (h.listen(8080)) {
         h.run();
     }
 }

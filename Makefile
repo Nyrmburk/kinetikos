@@ -1,9 +1,10 @@
-EXECUTABLE ?= kinetikos
+EtXECUTABLE ?= kinetikos
 
 BUILD_DIR ?= ./_build
 OUT := $(BUILD_DIR)/.make
  
 VENDOR ?= ./_vendor
+REMOTE_VENDOR ?= ./remote/html/_vendor
 INCLUDE := $(VENDOR)/include
 
 TOOLCHAIN_DIR ?= ../toolchain
@@ -23,7 +24,7 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 LIB_NAMES := libuWS.so
 BIN ?= $(OUT)/bin
 LIBRARIES = $(LIB_NAMES:%=$(OUT)/%)
-LIBS ?= -L$(BIN) -lm -lz -lssl -luWS
+LIBS ?= -L$(BIN) -lm -lz -lssl -lcrypto -luWS
 CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
 
@@ -66,17 +67,50 @@ clean:
 	$(RM) -r $(BUILD_DIR)
 
 .PHONY: setup
-setup:
-	git clone https://github.com/uNetworking/uWebSockets.git $(VENDOR)/uWebSockets
+setup: \
+	$(VENDOR)/uWebSockets \
+	$(VENDOR)/wiringPi \
+	$(REMOTE_VENDOR)/three.js \
+	$(REMOTE_VENDOR)/THREE.MeshLine \
+	$(REMOTE_VENDOR)/virtualjoystick.js \
+	$(REMOTE_VENDOR)/h264-live-player \
+	$(REMOTE_VENDOR)/dat.gui \
+	$(REMOTE_VENDOR)/stats.js \
+
+$(VENDOR)/uWebSockets:
+	git clone --depth=1 https://github.com/uNetworking/uWebSockets.git $@
 	mkdir -p $(INCLUDE)/uWS
-	cp -l $(VENDOR)/uWebSockets/src/*.h $(INCLUDE)/uWS
-	git clone git://git.drogon.net/wiringPi $(VENDOR)/wiringPi
+	cp -l $@/src/*.h $(INCLUDE)/uWS
+
+$(VENDOR)/wiringPi:
+	git clone --depth=1 git://git.drogon.net/wiringPi $@
 	mkdir -p $(INCLUDE)/wiringPi
-	cp -l $(VENDOR)/wiringPi/wiringPi/*.h $(VENDOR)/include/wiringPi
-	git clone https://github.com/google/flatbuffers.git $(VENDOR)/flatbuffers
-	cd $(VENDOR)/flatbuffers && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make
-	cp -l -r $(VENDOR)/flatbuffers/include/flatbuffers $(VENDOR)/include/
-	#cp -l -r $(VENDOR)/flatbuffers/js $(VENDOR)/js
+	cp -l $@/wiringPi/*.h $(VENDOR)/include/wiringPi
+
+$(VENDOR)/flatbuffers:
+	git clone --depth=1 https://github.com/google/flatbuffers.git $@
+	cd $@ && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make
+	cp -l -r $@/include/flatbuffers $(VENDOR)/include/
+	#cp -l -r $@/js $(VENDOR)/js
+
+$(REMOTE_VENDOR)/three.js:
+	git clone --depth=1 https://github.com/mrdoob/three.js.git $@
+
+$(REMOTE_VENDOR)/THREE.MeshLine:
+	git clone --depth=1 https://github.com/spite/THREE.MeshLine.git $@
+
+$(REMOTE_VENDOR)/virtualjoystick.js:
+	git clone --depth=1 https://github.com/jeromeetienne/virtualjoystick.js.git $@
+
+$(REMOTE_VENDOR)/h264-live-player:
+	git clone --depth=1 https://github.com/131/h264-live-player.git $@
+
+$(REMOTE_VENDOR)/dat.gui:
+	git clone --depth=1 https://github.com/dataarts/dat.gui.git $@
+
+$(REMOTE_VENDOR)/stats.js:
+	git clone --depth=1 https://github.com/mrdoob/stats.js.git $@
+
 
 # platform targets
 .PHONY: arm
