@@ -1,0 +1,34 @@
+body {
+    //font-family:Roboto, sans-serif;
+    //margin:2em;
+}
+
+hr {
+    //border:0.5em solid;
+    //backgrounds-color:black;
+}
+
+h1 {
+    //font-size:4.5em;
+    //margin:0em;
+}
+
+div {
+	//width:100%;
+	//max-width:24em;
+	//margin:1em;
+}
+
+div > h2 {
+    //font-size:3em;
+    //margin:0em;
+}
+
+div > hr {
+    //border:0.25em solid;
+    //backgrounds-color:black;
+}
+
+img {
+    //width:100%;
+}

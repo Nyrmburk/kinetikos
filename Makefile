@@ -1,4 +1,4 @@
-EtXECUTABLE ?= kinetikos
+EXECUTABLE ?= kinetikos
 
 BUILD_DIR ?= ./_build
 OUT := $(BUILD_DIR)/.make
@@ -66,8 +66,13 @@ run: default
 clean:
 	$(RM) -r $(BUILD_DIR)
 
-.PHONY: setup
-setup: \
+.PHONY: clean_vendor
+clean_vendor:
+	$(RM) -r $(VENDOR)
+	$(RM) -r $(REMOTE_VENDOR)
+
+.PHONY: vendor
+vendor: \
 	$(VENDOR)/uWebSockets \
 	$(VENDOR)/wiringPi \
 	$(REMOTE_VENDOR)/three.js \
