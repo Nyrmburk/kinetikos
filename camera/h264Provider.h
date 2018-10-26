@@ -14,13 +14,18 @@
 #ifndef H264_H
 #define H264_H
 
-class h264 {
-public:
-    h264();
-    h264(const h264& orig);
-    virtual ~h264();
-private:
+#include <cstdio>
 
+class h264Provider {
+public:
+    h264Provider(FILE source);
+    virtual ~h264Provider();
+    void run();
+private:
+    FILE* source;
+    unsigned char* frame;
+    size_t size;
+    size_t index;
 };
 
 #endif /* H264_H */
