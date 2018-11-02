@@ -29,7 +29,7 @@ CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
 
 .PHONY: default
-default: target $(OUT)/$(EXECUTABLE)
+default: target vendor $(OUT)/$(EXECUTABLE)
 
 $(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
@@ -83,7 +83,8 @@ vendor: \
 	$(REMOTE_VENDOR)/stats.js \
 
 $(VENDOR)/uWebSockets:
-	git clone --depth=1 https://github.com/uNetworking/uWebSockets.git $@
+	git clone https://github.com/uNetworking/uWebSockets.git $@
+	cd $@ && git checkout origin/v0.14
 	mkdir -p $(INCLUDE)/uWS
 	cp -l $@/src/*.h $(INCLUDE)/uWS
 
