@@ -1,7 +1,8 @@
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
+
 #include <cstdint>
 #include <map>
-#include "../robot/Body.h"
-//#include "../robot/RobotState.h"
 #include "../helper/Serializable.h"
 
 typedef Serializable* (*Procedure)(DataView* it);
@@ -56,3 +57,4 @@ public:
     }
 };
 
+#endif /* PROTOCOL_H */

@@ -17,6 +17,8 @@
 #include "Body.h"
 #include "../mapping/World.h"
 #include "../control/MotorControl.h"
+#include "../control/Joints.h"
+#include "../control/JointsControl.h"
 #include "../control/FootControl.h"
 
 class MotorControl;
@@ -36,9 +38,47 @@ private:
     Body *body;
     World *world;
     
-    FootControl *footControl;
+    Joints* joints;
+    Foot* feet;
+
     MotorControl *motorControl;
+    FootControl *footControl;
 };
 
 #endif /* ROBOT_H */
 
+/*
+include "../matrix/Mat4.fbs";
+include "../matrix/Vec3.fbs";
+
+struct Joint {
+	angle:float;
+	trim:short;
+}
+
+table Foot {
+	position:Vec3;
+//	tween:Tween;
+}
+
+table RobotState {
+	// world space
+	transformation:Mat4;
+	// local space
+	// layer 0
+	joints:[Joint];
+	trim:[short];
+	// layer 1
+	feet:[Foot];
+	// layer 2
+	velocity:float;
+	acceleration:float;
+	damping:float;
+	angularVelocity:float;
+	angularAcceleration:float;
+	angularDamping:float;
+	// layer 3
+//	navigationTarget:NavigationTarget; // layer 3
+}
+root_type RobotState;
+*/

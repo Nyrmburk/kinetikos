@@ -13,7 +13,7 @@
 #include "robot/Robot.h"
 #include "network/Server.h"
 #include "helper/SerializableTest.h"
-#include "control/Joint.h"
+#include "control/Joints.h"
 #include "control/Foot.h"
 #include "control/FootControl.h"
 
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
         positionChannel.step(((float) i) / 10);
         cout << position.x << ", " << position.y << ", " << position.z << endl;
     }
-    std::cout << std::endl;
+    cout << endl;
    
     // test footcontrol simulation step
     Robot robot;
@@ -52,11 +52,11 @@ int main(int argc, char** argv) {
     DataView view(buffer, 128);
     
     heckin.serialize(&view);
-    std::cout << "total bytes: " << view.getIndex() << std::endl;
+    cout << "total bytes: " << view.getIndex() << endl;
     view.rewind();
     heckin.deserialize(&view);
     heckin.print();
-    std::cout << std::endl;
+    cout << endl;
 
     // test nested object serialization
     view.mark();
@@ -65,21 +65,21 @@ int main(int argc, char** argv) {
     view.reset();
     whoosh.deserialize(&view);
     whoosh.passenger.print();
-    std::cout << std::endl;
+    cout << endl;
 
     // test joints
-    Joint joints[6];
+    Joints joints[6];
     for (int i = 0; i < 6; i++) {
-        std::cout << joints[i].joint << std::endl;
+        cout << joints[i].joints[0] << ", " << joints[i].joints[1] << ", " << joints[i].joints[2] << endl;
     }
-    std::cout << std::endl;
+    cout << endl;
 
     // test feet
     Foot feet[6];
     for (int i = 0; i < 6; i++) {
-        std::cout << feet[i].foot.x << ", " << feet[i].foot.y << ", " << feet[i].foot.z << std::endl;
+        cout << feet[i].foot.x << ", " << feet[i].foot.y << ", " << feet[i].foot.z << endl;
     }
-    std::cout << std::endl;
+    cout << endl;
 
     // test server
     Server server;
