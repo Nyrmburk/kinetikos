@@ -55,14 +55,14 @@ int main(int argc, char** argv) {
     std::cout << "total bytes: " << view.getIndex() << std::endl;
     view.rewind();
     heckin.deserialize(&view);
-    view.rewind();
     heckin.print();
     std::cout << std::endl;
 
     // test nested object serialization
+    view.mark();
     Spaceship whoosh;
     whoosh.serialize(&view);
-    view.rewind();
+    view.reset();
     whoosh.deserialize(&view);
     whoosh.passenger.print();
     std::cout << std::endl;

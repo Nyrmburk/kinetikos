@@ -31,6 +31,18 @@ public:
         this->index = 0;
     }
 
+    void mark() {
+        this->markIndex = index;
+    }
+
+    void mark(size_t index) {
+        this->markIndex = index;
+    }
+
+    void reset() {
+        this->index = markIndex;
+    }
+
     size_t getSize() {
         return size;
     }
@@ -105,6 +117,7 @@ private:
     char* data;
     const size_t size;
     size_t index = 0;
+    size_t markIndex = 0;
 
     void range(size_t count) {
         if (index + count > size) {
