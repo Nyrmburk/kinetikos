@@ -14,15 +14,34 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <functional>
+
 class Server {
 public:
     Server();
     virtual ~Server();
     
-    void run();
+    void run(std::function<void(int)> step, int millis);
 private:
-
 };
 
+/*
+class ResponseCallback {
+private:
+//    UWS* ws;
+    Writerator *writer;
+public: 
+    void send(uint16_t controlCode, Serializable* s) {
+        writer->writeU16(controlCode);
+        s->serialize(&writer);
+        //ws->send(writer.data(), writer.getSize(), OpCode.binary); 
+    }
+};
+
+struct User {
+    // int ringbuffer index
+    ResponseCallback responseCallback;
+};
+*/
 #endif /* SERVER_H */
 

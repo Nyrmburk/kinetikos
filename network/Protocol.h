@@ -4,18 +4,18 @@
 //#include "../robot/RobotState.h"
 #include "../helper/Serializable.h"
 
-typedef Serializable* (*Procedure)(Readerator* it);
+typedef Serializable* (*Procedure)(DataView* it);
 typedef std::map<uint16_t, Procedure> ProcedureMap;
 
 class Packet : public Serializable {
 public:
     uint16_t controlCode = 0;
 
-    void doSerialize(Writerator* writer) {
+    void serialize(DataView* writer) {
         writer->writeU16(controlCode);
     }
 
-    void doDeserialize(Readerator* reader) {
+    void deserialize(DataView* reader) {
         controlCode = reader->readU16();
     }
 };
@@ -25,38 +25,34 @@ public:
     Protocol();
     ProcedureMap procedureMap;
 
-    void insert(uint16_t controlCode, Procedure procedure) {
+    void addProcedure(uint16_t controlCode, Procedure procedure) {
         procedureMap.insert(std::make_pair(controlCode, procedure));
-    }
-
-    void insert(uint16_t controlCodeBase, Procedure* procedures) {
-        uint16_t controlCode = controlCodeBase;
-        for(size_t i = 0; procedures[i] != nullptr; i++) {
-            insert(controlCode++, procedures[i]);
-        }
     }
 
     int handleMessage(
             const char* dataIn, const size_t sizeIn,
-            char* dataOut, const size_t sizeDataOut) const {
+            char* dataOut, const size_t sizeOut) const {
 
         // get control code
         Packet packet;
-        Readerator reader(dataIn, sizeIn);
-        packet.doDeserialize(&reader);
+        DataView reader(const_cast<char*>(dataIn), sizeIn);
+        packet.deserialize(&reader);
 
         // get which procedure to run
         Procedure p = procedureMap.at(packet.controlCode);
 
         // execute the procedure and get its response
-        Serializable* s = p(&reader);
+        Serializable* response = p(&reader);
 
-        if (!s) {
+        if (!response) {
             return 0;
         }
 
         // write the response out and return size of bytes written
-        return s->serialize(dataOut, sizeDataOut);
+        DataView writer(dataOut, sizeOut);
+        packet.serialize(&writer);
+        response->serialize(&writer);
+        return writer.getSize();
     }
 };
 

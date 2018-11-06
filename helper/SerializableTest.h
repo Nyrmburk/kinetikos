@@ -9,7 +9,7 @@ public:
     float height = 4.3;
     double maxSpeed = 9.9999;
 
-    void doSerialize(Writerator* it) {
+    void serialize(DataView* it) {
         it->write32(legs);
         it->writeU8(sound.size() + 1);
         it->writeChars(sound.c_str(), sound.size() + 1);
@@ -17,7 +17,7 @@ public:
         it->writeDouble(maxSpeed);
     }
 
-    void doDeserialize(Readerator* it) {
+    void deserialize(DataView* it) {
         
         legs =  it->read32();
         uint8_t stringSize = it->readU8();
@@ -45,12 +45,12 @@ public:
         passenger.sound = "bark!";
     }
 
-    void doSerialize(Writerator* it) {
+    void serialize(DataView* it) {
         it->writeFloat(thrust);
         it->writeSerial(&passenger);
     }
     
-    void doDeserialize(Readerator* it) {
+    void deserialize(DataView* it) {
         thrust = it->readFloat();
         std::cout << thrust << std::endl;
         it->readSerial(&passenger);

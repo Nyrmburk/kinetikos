@@ -1,3 +1,4 @@
+#include <iostream>
 #include <uWS/uWS.h>
 #include "Server.h"
 #include "Protocol.h"
@@ -10,13 +11,33 @@ Server::Server() {
 Server::~Server() {
 }
 
-void Server::run() {
+// check out serveEventSource
+// because I need to have some sort of simulation data transmitted to the client on an interval
+// this is an example on that feature
+// it's got a stupid comment on it saying it's not even a test, but a major example >:(
+void Server::run(std::function<void(int)> step, int millis) {
 
     Hub h;
     std::string response = "Hello!"; 
     Protocol p;
     
     std::vector<char> buffer;
+
+    // struct for the user data in the simulation step
+    struct timerData {
+        std::function<void(int)> step;
+        int millis;
+    } data;
+    data.step = step;
+    data.millis = millis;
+
+    // set up the timer loop for simulation steps
+    uS::Timer *timer = new uS::Timer(h.getLoop());
+    timer->setData(&data);
+    timer->start([](uS::Timer *timer) {
+        timerData* data = (timerData*) timer->getData();
+        data->step(data->millis);
+    }, 0, millis);
 
     h.onMessage([&p, &buffer](WebSocket<SERVER> *ws, char *message, size_t length, OpCode opCode) {
         size_t readBytes = 0;

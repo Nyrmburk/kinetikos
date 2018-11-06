@@ -15,7 +15,7 @@ var dict = {
 
 var uri = "ws://" + document.location.hostname + ":8080";
 var socket = new WebSocket(uri, "bson-protocol");
-var network = new Network(dict, socket);
+//var network = new Network(dict, socket);
 
 socket.onopen = function(evt) {
 	console.log("socket opened");
@@ -110,7 +110,7 @@ function initGUI() {
 				robotControls.rotation = Double(-joystick.deltaX() / joystick._stickRadius);
 			}
 			robotControls.height = Double(robotControls.height.valueOf());
-			network.send("controls", robotControls);
+			//network.send("controls", robotControls);
 		}
 	}, 50);
 }
@@ -140,17 +140,17 @@ function generateFloor() {
 
 // request for the robot layout to be sent
 function requestBody() {
-	network.send("body", "");
+	//network.send("body", "");
 }
 
 // request a full version of the map
 function requestWorldMap() {
-	network.send("worldMap", "");
+	//network.send("worldMap", "");
 }
 
 // tell the robot to move to a certain location
 function setDestination(destination) {
-	network.send("destination", destination);
+	//network.send("destination", destination);
 }
 
 //////  responses  //////

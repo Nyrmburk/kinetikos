@@ -1,3 +1,6 @@
+#ifndef SERIALIZABLE_H
+#define SERIALIZABLE_H
+
 #include <exception>
 #include <stdexcept>
 #include <cstdlib>
@@ -8,36 +11,29 @@
 #define size32 4
 #define size64 8
 
-class Iterator {
+class Serializable;
+
+class DataView {
 public:
-    Iterator(char* data, const size_t size) :
+    DataView(char* data, const size_t size) :
             size{size},
             data{data} {}
 
-    size_t getSize() {
+    size_t getIndex() {
         return index;
     }
-protected:
-    char* data;
-    const size_t size;
-    size_t index = 0;
 
-    void range(size_t count) {
-        if (index + count > size) {
-            throw std::out_of_range(
-                    "Error accessing " + std::to_string(count) +
-                    " at " + std::to_string(index) +
-                    " out of " + std::to_string(size) +
-                    " bytes.");
-        }
+    void setIndex(size_t index) {
+        this->index = index;
     }
-};
 
-class Serializable;
+    void rewind() {
+        this->index = 0;
+    }
 
-class Writerator : public Iterator {
-public:
-    Writerator(char* data, const size_t size);
+    size_t getSize() {
+        return size;
+    }
 
     // 8 bit
     void writeU8(uint8_t value);
@@ -71,17 +67,6 @@ public:
 
     // Serializable
     void writeSerial(Serializable* s);
-
-private:
-    void raw8(uint8_t value);
-    void raw16(uint16_t value);
-    void raw32(uint32_t value);
-    void raw64(uint64_t value);
-};
-
-class Readerator : public Iterator {
-public:
-    Readerator(const char* data, const size_t size);
 
     // 8 bit
     uint8_t readU8();
@@ -117,28 +102,37 @@ public:
     void readSerial(Serializable* s);
 
 private:
-    uint8_t raw8();
-    uint16_t raw16();
-    uint32_t raw32();
-    uint64_t raw64();
+    char* data;
+    const size_t size;
+    size_t index = 0;
+
+    void range(size_t count) {
+        if (index + count > size) {
+            throw std::out_of_range(
+                    "Error accessing " + std::to_string(count) +
+                    " at " + std::to_string(index) +
+                    " out of " + std::to_string(size) +
+                    " bytes.");
+        }
+    }
+
+    // no bounds checked writes
+    void writeRaw8(uint8_t value);
+    void writeRaw16(uint16_t value);
+    void writeRaw32(uint32_t value);
+    void writeRaw64(uint64_t value);
+
+    // no bounds checked reads
+    uint8_t readRaw8();
+    uint16_t readRaw16();
+    uint32_t readRaw32();
+    uint64_t readRaw64();
 };
 
 class Serializable {
 public:
-    // accessed bytes | write/read buffer | buffer size
-    // if the accessed bytes < 0, then there wasn't enough buffer space
-    size_t serialize(char* bufferOut, const size_t bufferSize) {
-        Writerator writer(bufferOut, bufferSize);
-        doSerialize(&writer);
-        return writer.getSize();
-    }
-    size_t deserialize(const char* bufferIn, const size_t bufferSize) {
-        Readerator reader(bufferIn, bufferSize);
-        doDeserialize(&reader);
-        return reader.getSize();
-    }
-
-    virtual void doSerialize(Writerator* writer) = 0;
-    virtual void doDeserialize(Readerator* reader) = 0;
+    virtual void serialize(DataView* writer) = 0;
+    virtual void deserialize(DataView* reader) = 0;
 };
 
+#endif /* SERIALIZABLE_H */

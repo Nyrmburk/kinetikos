@@ -1,15 +1,15 @@
 #include "RobotProtocol.h"
 
-Serializable* controlJoints(Readerator* it) {
+Serializable* controlJoints(DataView* it) {
 }
-Serializable* controlFeet(Readerator* it) {
+Serializable* controlFeet(DataView* it) {
 }
-Serializable* controlFootPaths(Readerator* it) {
+Serializable* controlFootPaths(DataView* it) {
 }
-Serializable* controlVelocity(Readerator* it) {
+Serializable* controlVelocity(DataView* it) {
 }
-Serializable* controlNavigationPath(Readerator* it) {
+Serializable* controlNavigationPath(DataView* it) {
 }
-Serializable* controlDestination(Readerator* it) {
+Serializable* controlDestination(DataView* it) {
 }
 
