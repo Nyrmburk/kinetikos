@@ -17,11 +17,7 @@
 #include "../matrix/mat4.h"
 #include "Leg.h"
 
-class Body {
-public:
-    Body();
-    virtual ~Body();
-    
+struct Body {
     Mat4 orientation;
     int legsCount;
     Leg *legs;

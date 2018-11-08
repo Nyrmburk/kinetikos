@@ -8,16 +8,8 @@
 class Robot;
 
 class JointsControl {
-
     // compute the values for joints from the value of feet
-    void control(Robot* robot, Joints* joints, const Foot* feet) {
-
-        // todo: move implementation to a cpp file
-//        for (size_t i = 0; i < robot->body->legsCount; i++) {
-            // this probably has to be using robot->body->legs[i].solve(...)
-            //feet[i]
-//        }
-    }
+    void control(Robot* robot, Joints joints[], const Foot feet[]);
 };
 
 #endif /* JOINTS_CONTROL_H */

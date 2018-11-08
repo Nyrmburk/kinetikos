@@ -19,6 +19,7 @@
 #include "../control/MotorControl.h"
 #include "../control/Joints.h"
 #include "../control/JointsControl.h"
+#include "../control/Foot.h"
 #include "../control/FootControl.h"
 
 class MotorControl;
