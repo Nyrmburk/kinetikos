@@ -16,14 +16,15 @@
 
 #include "Body.h"
 #include "../mapping/World.h"
-#include "../control/MotorControl.h"
-#include "../control/Joints.h"
-#include "../control/JointsControl.h"
 #include "../control/Foot.h"
-#include "../control/FootControl.h"
+#include "../control/Joints.h"
+#include "../control/MotorControl.h"
 
-class MotorControl;
+class Foot;
 class FootControl;
+class Joints;
+class JointsControl;
+class MotorControl;
 
 class Robot {
 public:

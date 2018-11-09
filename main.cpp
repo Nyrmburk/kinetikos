@@ -13,9 +13,6 @@
 #include "robot/Robot.h"
 #include "network/Server.h"
 #include "helper/SerializableTest.h"
-#include "control/Joints.h"
-#include "control/Foot.h"
-#include "control/FootControl.h"
 
 using namespace std;
 
@@ -23,27 +20,40 @@ int main(int argc, char** argv) {
     
     // test tweens
     Vec3 startPosition = {0, 0, 0};
-    Tween<Vec3> start(startPosition, 0.0f, &easeQuadraticInOut);
+    Tween<Vec3> start(startPosition, 0.0f, easeQuadraticInOut);
     
-    Vec3 endPosition = {10, 5, 7};
-    Tween<Vec3> end(endPosition, 1.0f, easeNone);
+    Vec3 midPosition = {10, 5, 7};
+    Tween<Vec3> mid(midPosition, 0.5f, easeLinear);
     
+    Vec3 endPosition = {-5, 0, 3.141592654f};
+    Tween<Vec3> end(endPosition, 0.9f, easeQuadraticOut);
+
+    Vec3 futurePosition = {-1, -1, -1};
+    Tween<Vec3> future(futurePosition, 1.8f, easeNone);
+
+    Vec3 dupePosition = {1, 1, 1};
+    Tween<Vec3> dupe(dupePosition, 1.8f, easeNone);
+   
     Vec3 position;
-    Vec3Channel positionChannel(position);
+    Vec3Channel positionChannel;
     
+    positionChannel.insertTween(future);
+    positionChannel.insertTween(dupe);
     positionChannel.insertTween(start);
+    positionChannel.insertTween(mid);
     positionChannel.insertTween(end);
-    
-    for (int i = 0; i <= 10; i++) {
-        positionChannel.step(((float) i) / 10);
-        cout << position.x << ", " << position.y << ", " << position.z << endl;
+   
+    int resolution = 20;
+    float endTime = 2;
+    for (int i = 0; i <= resolution; i++) {
+        float time = ((float) i) / resolution;
+        time *= endTime;
+        positionChannel.step(time, position);
+        cout << time << ": " << position.x << ", " << position.y << ", " << position.z << endl;
     }
     cout << endl;
    
-    // test footcontrol simulation step
     Robot robot;
-    FootControl footControl = FootControl(6);
-    footControl.step(&robot, (float) 3);
 
     // test single object serialization
     Doggo heckin;

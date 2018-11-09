@@ -19,9 +19,7 @@
 
 class Vec3Channel : public TweenChannel<Vec3> {
 public:
-    Vec3Channel(Vec3& vec) : TweenChannel(vec) {}
-    
-    void ease(Vec3* start, Vec3* end, float k, Vec3* result) {
+    void ease(Vec3* start, Vec3* end, float k, Vec3* result) const {
         subtractv3(end, start, result);
         multiplyv3s(result, k, result);
         addv3(start, result, result);

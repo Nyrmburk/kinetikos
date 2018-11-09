@@ -44,7 +44,7 @@ public:
         value = t;
     }
     
-    float getTime() {
+    float getTime() const {
         return time;
     }
     
