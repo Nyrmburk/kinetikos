@@ -58,6 +58,11 @@ target:
 
 -include $(DEPS)
 
+.PHONY: strict
+strict: CFLAGS += -Werror -Wall
+strict: CXXFLAGS += -Werror -Wall
+strict: default
+
 .PHONY: run
 run: default
 	@export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(shell pwd)/$(BIN) && $(OUT)/$(EXECUTABLE)
