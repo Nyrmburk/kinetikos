@@ -26,7 +26,7 @@ template <typename T>
 class Tween {
 public:
     Tween() {}
-    Tween(T& value, float time, easeFunc function) {
+    Tween(const T& value, float time, easeFunc function) {
         setValue(value);
         this->time = time;
         setFunction(function);
@@ -40,7 +40,7 @@ public:
         return &value;
     }
     
-    void setValue(T& t)  {
+    void setValue(const T& t)  {
         value = t;
     }
     

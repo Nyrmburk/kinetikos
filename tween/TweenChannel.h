@@ -71,7 +71,7 @@ public:
         *returnEnd = *returnStart;
     }
     
-    void insertTween(Tween<T>& t) {
+    void insertTween(const Tween<T>& t) {
         size_t i = tweens.size();
         while (i --> 0) { // start looking backwards from the end
             if (tweens[i].getTime() <= t.getTime())
@@ -80,7 +80,7 @@ public:
         tweens.insert(tweens.begin() + i + 1, t);
     }
     
-    void removeTween(Tween<T>& t) {
+    void removeTween(const Tween<T>& t) {
         tweens.erase(t);
     }
     
