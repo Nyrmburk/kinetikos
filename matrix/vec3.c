@@ -92,11 +92,16 @@ float mannhattanv3(const Vec3 *vec) {
     return vec->x + vec->y + vec->z;
 }
 
-
 void setv3(Vec3 *from, const Vec3 *vec) {
     from->x = vec->x;
     from->y = vec->y;
     from->z = vec->z;
+}
+
+void setv3s(float x, float y, float z, Vec3 *result) {
+    result->x = x;
+    result->y = y;
+    result->z = z;
 }
 
 int equalsv3(const Vec3 *from, const Vec3 *vec) {

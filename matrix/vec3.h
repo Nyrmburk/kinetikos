@@ -54,6 +54,7 @@ float distancev3(const Vec3 *from, const Vec3 *to);
 float lengthv3(const Vec3 *vec);
 float mannhattanv3(const Vec3 *vec);
 void setv3(Vec3 *to, const Vec3 *from);
+void setv3s(float x, float y, float z, Vec3 *result);
 int equalsv3(const Vec3 *from, const Vec3 *vec);
 
 #ifdef __cplusplus
