@@ -84,7 +84,7 @@ public:
         tweens.erase(t);
     }
     
-    void step(float time, I& result) const {
+    void step(float time, O& result) const {
         Tween<I> start, end;
         getTweens(time, &start, &end);
         float range = end.getTime() - start.getTime();

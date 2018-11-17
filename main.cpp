@@ -8,8 +8,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include "matrix/vec3.h"
 #include "tween/Tween.h"
 #include "tween/Vec3Channel.h"
+#include "tween/Bezier3Channel.h"
 #include "robot/Robot.h"
 #include "network/Server.h"
 #include "helper/SerializableTest.h"
@@ -52,6 +54,8 @@ int main(int argc, char** argv) {
         cout << time << ": " << position.x << ", " << position.y << ", " << position.z << endl;
     }
     cout << endl;
+
+    Bezier3Channel splineChannel;
    
     Robot robot;
 
@@ -85,9 +89,9 @@ int main(int argc, char** argv) {
     cout << endl;
 
     // test feet
-    Foot feet[6];
+    Vec3 feet[6];
     for (int i = 0; i < 6; i++) {
-        cout << feet[i].foot.x << ", " << feet[i].foot.y << ", " << feet[i].foot.z << endl;
+        cout << feet[i].x << ", " << feet[i].y << ", " << feet[i].z << endl;
     }
     cout << endl;
 

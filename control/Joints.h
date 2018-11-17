@@ -1,8 +1,8 @@
 #ifndef JOINTS_H
 #define JOINTS_H
 
+#include "../matrix/vec3.h"
 #include "../helper/Serializable.h"
-#include "Foot.h"
 
 class Robot;
 
@@ -22,7 +22,7 @@ public:
 class JointsControl {
 public:
     // compute the values for joints from the foot
-    void control(Robot* robot, const Foot* foot, Joints* returnJoints);
+    void control(Robot* robot, const Vec3* foot, Joints* returnJoints);
 };
 
 #endif /* JOINTS_H */

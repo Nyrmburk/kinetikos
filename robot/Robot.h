@@ -37,50 +37,16 @@ public:
     void simulationStep(float delta);
     void animationStep(float delta);
 private:
-    Body *body;
-    World *world;
+    Body* body;
+    World* world;
     
     Joints* joints;
     Foot* feet;
+    Bezier3Channel* footPaths;
 
-    MotorControl *motorControl;
-    FootControl *footControl;
+    MotorControl* motorControl;
+    JointsControl* jointsControl;
+    FootControl* footControl;
 };
 
 #endif /* ROBOT_H */
-
-/*
-include "../matrix/Mat4.fbs";
-include "../matrix/Vec3.fbs";
-
-struct Joint {
-	angle:float;
-	trim:short;
-}
-
-table Foot {
-	position:Vec3;
-//	tween:Tween;
-}
-
-table RobotState {
-	// world space
-	transformation:Mat4;
-	// local space
-	// layer 0
-	joints:[Joint];
-	trim:[short];
-	// layer 1
-	feet:[Foot];
-	// layer 2
-	velocity:float;
-	acceleration:float;
-	damping:float;
-	angularVelocity:float;
-	angularAcceleration:float;
-	angularDamping:float;
-	// layer 3
-//	navigationTarget:NavigationTarget; // layer 3
-}
-root_type RobotState;
-*/
