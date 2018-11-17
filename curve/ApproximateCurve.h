@@ -1,13 +1,22 @@
+#ifndef APPROXIMATE_CURVE_H
+#define APPROXIMATE_CURVE_H
+
 #include "Curve.h"
 
 template<typename T>
 class ApproximateCurve : public Curve<T> {
 public:
-    ApproximateCurve(size_t segments) {
+    ApproximateCurve(size_t segments = 10) {
         this->segmentCount = segments;
         lengthLookup = new float[segments];
+    }
 
-        float step = 1.0f / segments;
+    ~ApproximateCurve() {
+        delete lengthLookup;
+    }
+
+    void approximate() {
+        float step = 1.0f / segmentCount;
         float t = 0;
         T* previous;
         T* next;
@@ -15,7 +24,7 @@ public:
         float totalLength = 0;
 
         // populate length lookup table
-        for (size_t i = 0; i < segments; i++) {
+        for (size_t i = 0; i < segmentCount; i++) {
             t += step;
             this->valueAt(t, next);
             totalLength += distance(previous, next);
@@ -29,13 +38,9 @@ public:
 
         // normalize the length from [0, length] to [0, 1]
         totalLength = 1.0f / totalLength; // pre-divide
-        for (size_t i = 0; i < segments; i++) {
+        for (size_t i = 0; i < segmentCount; i++) {
             lengthLookup[i] *= totalLength;
         }
-    }
-
-    ~ApproximateCurve() {
-        delete lengthLookup;
     }
 
     void linearValueAt(float t, T* value) {
@@ -66,3 +71,4 @@ public:
     float* lengthLookup;
 };
 
+#endif /* APPROXIMATE_CURVE_H */

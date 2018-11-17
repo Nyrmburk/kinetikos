@@ -8,7 +8,7 @@
 
 class Bezier3 : public ApproximateCurve<Vec3> {
 public:
-    struct Bezier3Node : Serializable {
+    struct Node : Serializable {
         Vec3 point;
         Vec3 handle;
 
@@ -23,8 +23,13 @@ public:
         }
     };
 
-    Bezier3Node* start;
-    Bezier3Node* end;
+    Node* start;
+    Node* end;
+
+    Bezier3(Node* start, Node* end, size_t segments = 10) : ApproximateCurve<Vec3>(segments) {
+        this->start = start;
+        this->end = end;
+    }
 
     void valueAt(float t, Vec3* result) {
         float one_minus_t = (1 - t);

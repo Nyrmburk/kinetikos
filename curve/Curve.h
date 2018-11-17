@@ -1,6 +1,8 @@
 #ifndef CURVE_H
 #define CURVE_H
 
+#include "../helper/Serializable.h"
+
 template<typename T>
 class Curve : public Serializable {
 public:
