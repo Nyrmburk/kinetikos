@@ -54,10 +54,10 @@ using namespace std;
 // I think I planned for consumption anyway
 // that way it would always be the first and second tween
 
-template <typename T>
+template <typename I, typename O>
 class TweenChannel {
 public:
-    void getTweens(float time, Tween<T>* returnStart, Tween<T>* returnEnd) const {
+    void getTweens(float time, Tween<I>* returnStart, Tween<I>* returnEnd) const {
         for (size_t i = 0; i < tweens.size(); i++) {
             if (time < tweens[i].getTime()) {
                 *returnEnd = tweens[i];
@@ -71,7 +71,7 @@ public:
         *returnEnd = *returnStart;
     }
     
-    void insertTween(const Tween<T>& t) {
+    void insertTween(const Tween<I>& t) {
         size_t i = tweens.size();
         while (i --> 0) { // start looking backwards from the end
             if (tweens[i].getTime() <= t.getTime())
@@ -80,12 +80,12 @@ public:
         tweens.insert(tweens.begin() + i + 1, t);
     }
     
-    void removeTween(const Tween<T>& t) {
+    void removeTween(const Tween<I>& t) {
         tweens.erase(t);
     }
     
-    void step(float time, T& result) const {
-        Tween<T> start, end;
+    void step(float time, I& result) const {
+        Tween<I> start, end;
         getTweens(time, &start, &end);
         float range = end.getTime() - start.getTime();
         float t = 0;
@@ -96,9 +96,9 @@ public:
         ease(start.getValue(), end.getValue(), k, &result);
     }
     
-    virtual void ease(T* start, T* end, float k, T* result) const = 0;
+    virtual void ease(I* start, I* end, float k, O* result) const = 0;
 private:
-    vector<Tween<T>> tweens;
+    vector<Tween<I>> tweens;
 };
 
 #endif /* TWEEN_CHANNEL_H */

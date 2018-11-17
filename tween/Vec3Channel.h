@@ -17,7 +17,7 @@
 #include "TweenChannel.h"
 #include "../matrix/vec3.h"
 
-class Vec3Channel : public TweenChannel<Vec3> {
+class Vec3Channel : public TweenChannel<Vec3, Vec3> {
 public:
     void ease(Vec3* start, Vec3* end, float k, Vec3* result) const {
         subtractv3(end, start, result);
