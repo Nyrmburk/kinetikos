@@ -80,6 +80,7 @@ clean_vendor:
 vendor: \
 	$(VENDOR)/uWebSockets \
 	$(VENDOR)/wiringPi \
+	$(VENDOR)/rapidjson \
 	$(REMOTE_VENDOR)/three.js \
 	$(REMOTE_VENDOR)/THREE.MeshLine \
 	$(REMOTE_VENDOR)/virtualjoystick.js \
@@ -103,6 +104,10 @@ $(VENDOR)/flatbuffers:
 	cd $@ && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make
 	cp -l -r $@/include/flatbuffers $(VENDOR)/include/
 	#cp -l -r $@/js $(VENDOR)/js
+
+$(VENDOR)/rapidjson:
+	git clone --depth=1 https://github.com/Tencent/rapidjson.git $@
+	cp -l -r $@/include/ $(VENDOR)/
 
 $(REMOTE_VENDOR)/three.js:
 	git clone --depth=1 https://github.com/mrdoob/three.js.git $@
