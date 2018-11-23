@@ -9,12 +9,14 @@
 #include <cstdlib>
 #include <unistd.h>
 #include "matrix/vec3.h"
-#include "tween/Tween.h"
-#include "tween/Vec3Channel.h"
-#include "tween/Bezier3Channel.h"
+#include "animation/Tween.h"
+#include "animation/Vec3Channel.h"
+#include "animation/Bezier3Channel.h"
 #include "robot/Robot.h"
 #include "network/Server.h"
 #include "helper/SerializableTest.h"
+#include "animation/AnimationJson.h"
+#include "animation/RobotClip.h"
 
 using namespace std;
 
@@ -50,14 +52,58 @@ int main(int argc, char** argv) {
     for (int i = 0; i <= resolution; i++) {
         float time = ((float) i) / resolution;
         time *= endTime;
-        positionChannel.step(time, position);
+        positionChannel.act(time, position);
         cout << time << ": " << position.x << ", " << position.y << ", " << position.z << endl;
     }
     cout << endl;
 
     Bezier3Channel splineChannel;
-   
+  
+    // test robot
     Robot robot;
+
+    // test body
+    Body* body = robot.getBody();
+    Leg* legs = body->legs;
+    int legsCount = body->legsCount;
+
+    for (size_t i = 0; i < body->legsCount; i++) {
+        Leg leg = legs[i];
+        cout << "leg " << i << endl;
+        cout << "offset: " << leg.offset.x << ", " << leg.offset.y << ", " << leg.offset.z << endl;
+        cout << "coxa: " << leg.coxa.length << ", " << leg.coxa.angle << ", " << leg.coxa.range << endl;
+        cout << "femur: " << leg.femur.length << ", " << leg.femur.angle << ", " << leg.femur.range << endl;
+        cout << "tibia: " << leg.tibia.length << ", " << leg.tibia.angle << ", " << leg.tibia.range << endl;
+    }
+    cout << endl;
+    
+    // test joints
+    Joints* joints = robot.getJoints();
+    for (int i = 0; i < legsCount; i++) {
+        cout << joints[i].joints[0] << ", " << joints[i].joints[1] << ", " << joints[i].joints[2] << endl;
+    }
+    cout << endl;
+
+    // test feet
+    Vec3* feet = robot.getFeet();
+    for (int i = 0; i < legsCount; i++) {
+        cout << feet[i].x << ", " << feet[i].y << ", " << feet[i].z << endl;
+    }
+    cout << endl;
+
+    // test animations
+    AnimationJson animations("config/animations.json");
+    RobotClip clip = animations.getAnimation("actual");
+
+    cout << "testing stepping" << endl;
+    Mat4 cool;
+    clip.setTargets(&cool, feet);
+    float step = 0.2;
+    for (float i = 0; i < clip.length; i += step) {
+        clip.step(step);
+        cout << feet[0].x << ", " << feet[0].y << ", " << feet[0].z << endl;
+    }
+    cout << endl;
 
     // test single object serialization
     Doggo heckin;
@@ -81,21 +127,8 @@ int main(int argc, char** argv) {
     whoosh.passenger.print();
     cout << endl;
 
-    // test joints
-    Joints joints[6];
-    for (int i = 0; i < 6; i++) {
-        cout << joints[i].joints[0] << ", " << joints[i].joints[1] << ", " << joints[i].joints[2] << endl;
-    }
-    cout << endl;
-
-    // test feet
-    Vec3 feet[6];
-    for (int i = 0; i < 6; i++) {
-        cout << feet[i].x << ", " << feet[i].y << ", " << feet[i].z << endl;
-    }
-    cout << endl;
-
     // test server
+    cout << "testing server" << endl;
     Server server;
     server.run([&robot](int millis) {
         robot.simulationStep(((float) millis) / 1000);

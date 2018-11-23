@@ -20,7 +20,6 @@
 #include "../control/Joints.h"
 #include "../control/MotorControl.h"
 
-class Foot;
 class FootControl;
 class Joints;
 class JointsControl;
@@ -33,6 +32,16 @@ public:
     
     Body* getBody();
     World* getWorld();
+
+    Joints* getJoints() {
+        return joints;
+    }
+    Vec3* getFeet() {
+        return feet;
+    }
+    Bezier3Channel* getFootPaths() {
+        return footPaths;
+    }
     
     void simulationStep(float delta);
     void animationStep(float delta);
@@ -41,7 +50,7 @@ private:
     World* world;
     
     Joints* joints;
-    Foot* feet;
+    Vec3* feet;
     Bezier3Channel* footPaths;
 
     MotorControl* motorControl;

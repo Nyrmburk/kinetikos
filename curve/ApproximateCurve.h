@@ -18,8 +18,10 @@ public:
     void approximate() {
         float step = 1.0f / segmentCount;
         float t = 0;
-        T* previous;
-        T* next;
+        T temp1;
+        T* previous = &temp1;
+        T temp2;
+        T* next = &temp2;
         this->valueAt(t, previous);
         float totalLength = 0;
 
@@ -45,16 +47,17 @@ public:
 
     void linearValueAt(float t, T* value) {
         float previous = 0;
-        float next;
+        float next = 0;
         float step = 1.0f / segmentCount;
         for (size_t i = 0; i < segmentCount; i++) {
+            previous = next;
             next = lengthLookup[i];
             if (next > t) {
                 // map t between [0, 1](linear) to [previous, next]
                 t = (t - previous) / (next - previous);
 
                 // map t from [previous, next] to [0, 1](nonlinear)
-                t = (i + t) * step;
+                t = i * step + t * step;
                 this->valueAt(t, value);
                 break;
             }

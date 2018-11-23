@@ -1,7 +1,6 @@
 #include "FootPath.h"
 #include "../matrix/vec3.h"
-#include "../tween/Tween.h"
-#include "../tween/Bezier3Channel.h"
+#include "../animation/Tween.h"
 
 void FootPathControl::control(Robot* robot, const Vec3* target, Bezier3Channel* returnPath) {
     Vec3* handle = new Vec3;

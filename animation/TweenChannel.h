@@ -1,3 +1,9 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 /* 
  * File:   tween_channel.h
  * Author: nyrmburk
@@ -48,51 +54,51 @@ using namespace std;
 // I think I planned for consumption anyway
 // that way it would always be the first and second tween
 
-template <typename T>
+template <typename I, typename O>
 class TweenChannel {
 public:
-    TweenChannel(T& value) : value(value) {};
-//    virtual ~TweenChannel() {};
-    
-    void getTweens(float t, Tween<T>* start, Tween<T>* end) {
-        
-        for (unsigned int i = 0; i < tweens.size(); i++) {
-            if (tweens[i].getTime() > t) {
-                end = &tweens[i];
-                break;
+    void getTweens(float time, Tween<I>* returnStart, Tween<I>* returnEnd) const {
+        for (size_t i = 0; i < tweens.size(); i++) {
+            if (time < tweens[i].getTime()) {
+                *returnEnd = tweens[i];
+                return;
             } else {
-                start = &tweens[i];
+                *returnStart = tweens[i];
             }
         }
 
-        if (!end)
-            end = start;
+        // there's only one element left in the list
+        *returnEnd = *returnStart;
     }
     
-    void insertTween(Tween<T>& t) {
-        unsigned int i = tweens.size();
-        while (i --> 0) {
-            if (tweens[i].getTime() < t.getTime())
-                tweens.insert(tweens.begin() + i + 1, t);
+    void insertTween(const Tween<I>& t) {
+        size_t i = tweens.size();
+        while (i --> 0) { // start looking backwards from the end
+            if (tweens[i].getTime() <= t.getTime())
+                break;
         }
+        tweens.insert(tweens.begin() + i + 1, t);
     }
     
-    void removeTween(Tween<T>& t) {
+    void removeTween(const Tween<I>& t) {
         tweens.erase(t);
     }
     
-    void step(float t) {
-        Tween<T> *start, *end;
-        getTweens(t, start, end);
-        float k = start->ease(t);
-        ease(&(start->getValue()), &(end->getValue()), k, &value);
+    void act(float time, O& result) const {
+        Tween<I> start, end;
+        getTweens(time, &start, &end);
+        float range = end.getTime() - start.getTime();
+        float t = 0;
+        if (range != 0.0f) {
+            t = (time - start.getTime()) / range;
+        }
+        float k = start.ease(t);
+        ease(start.getValue(), end.getValue(), k, &result);
     }
     
-    virtual void ease(T* start, T* end, float k, T* result) = 0;
+    virtual void ease(I* start, I* end, float k, O* result) const = 0;
 private:
-    T value;
-    vector<Tween<T>> tweens;
+    vector<Tween<I>> tweens;
 };
 
 #endif /* TWEEN_CHANNEL_H */
-

@@ -2,7 +2,7 @@
 #define FOOTPATH_H
 
 #include "../matrix/vec3.h"
-#include "../tween/Bezier3Channel.h"
+#include "../animation/Bezier3Channel.h"
 #include "Foot.h"
 
 class FootPathControl {

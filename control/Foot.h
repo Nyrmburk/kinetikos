@@ -2,7 +2,7 @@
 #define FOOT_H
 
 #include "../helper/Serializable.h"
-#include "../tween/Bezier3Channel.h"
+#include "../animation/Bezier3Channel.h"
 
 class Robot;
 

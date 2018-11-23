@@ -48,7 +48,7 @@ public:
         return time;
     }
     
-    easeFunc* getFunction() {
+    easeFunc getFunction() {
         return function;
     }
     
