@@ -33,12 +33,18 @@ public:
     Body* getBody();
     World* getWorld();
 
+    Mat4* getOrientation() {
+        return &orientation;
+    }
+
     Joints* getJoints() {
         return joints;
     }
+
     Vec3* getFeet() {
         return feet;
     }
+
     Bezier3Channel* getFootPaths() {
         return footPaths;
     }
@@ -49,6 +55,7 @@ private:
     Body* body;
     World* world;
     
+    Mat4 orientation;
     Joints* joints;
     Vec3* feet;
     Bezier3Channel* footPaths;

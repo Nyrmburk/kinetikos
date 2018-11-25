@@ -1,15 +1,15 @@
 #include "RobotProtocol.h"
 
-Serializable* controlJoints(DataView* it) {
+void RobotProtocol::controlJoints(DataView& in, DataView& out) {
 }
-Serializable* controlFeet(DataView* it) {
+void RobotProtocol::controlFeet(DataView& in, DataView& out) {
 }
-Serializable* controlFootPaths(DataView* it) {
+void RobotProtocol::controlFootPaths(DataView& in, DataView& out) {
 }
-Serializable* controlVelocity(DataView* it) {
+void RobotProtocol::controlVelocity(DataView& in, DataView& out) {
 }
-Serializable* controlNavigationPath(DataView* it) {
+void RobotProtocol::controlNavigationPath(DataView& in, DataView& out) {
 }
-Serializable* controlDestination(DataView* it) {
+void RobotProtocol::controlDestination(DataView& in, DataView& out) {
 }
 

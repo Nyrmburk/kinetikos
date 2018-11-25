@@ -14,13 +14,29 @@
 #ifndef BODY_H
 #define BODY_H
 
-#include "../matrix/mat4.h"
 #include "Leg.h"
+#include "../helper/Serializable.h"
+#include "../matrix/mat4.h"
 
-struct Body {
-    Mat4 orientation;
-    int legsCount;
-    Leg *legs;
+struct Body : public Serializable {
+    uint8_t legsCount = 0;
+    Leg *legs = nullptr;
+
+    void serialize(DataView* data) {
+        data->writeU8(legsCount);
+        for (uint8_t i = 0; i < legsCount; i++) {
+            data->writeSerial(&legs[i]);
+        }
+    }
+
+    void deserialize(DataView* data) {
+        legsCount = data->readU8();
+        delete[] legs;
+        legs = new Leg[legsCount];
+        for (uint8_t i = 0; i < legsCount; i++) {
+            data->readSerial(&legs[i]);
+        }
+    }
 };
 
 #endif /* BODY_H */

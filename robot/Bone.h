@@ -14,10 +14,11 @@
 #ifndef BONE_H
 #define BONE_H
 
+#include "../helper/Serializable.h"
 #include "../matrix/mat4.h"
 #include "../matrix/vec3.h"
 
-class Bone {
+class Bone : public Serializable {
 public:
     Bone();
     
@@ -26,6 +27,18 @@ public:
     float range;
     
     void solve(const Vec3 *axis, const float joint, Mat4 *matrix);
+
+    void serialize(DataView* data) {
+        data->writeFloat(length);
+        data->writeFloat(angle);
+        data->writeFloat(range);
+    }
+
+    void deserialize(DataView* data) {
+        length = data->readFloat();
+        angle = data->readFloat();
+        range = data->readFloat();
+    }
 };
 
 #endif /* BONE_H */

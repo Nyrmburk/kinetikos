@@ -15,7 +15,9 @@
 #define LEG_H
 
 #include "Bone.h"
+#include "../helper/Serializable.h"
 #include "../matrix/vec3.h"
+#include "../matrix/MatSerialize.h"
 
 #define BONES_PER_LEG 3
 
@@ -23,7 +25,7 @@ const Vec3 COXA_AXIS = {0, 0, 1}; // z is up
 const Vec3 FEMUR_AXIS = {0, -1, 0}; // y is forward
 const Vec3 TIBIA_AXIS = FEMUR_AXIS;
 
-class Leg {
+class Leg : public Serializable {
 public:
     Leg();
 
@@ -34,6 +36,20 @@ public:
     
     void solveForward(const Mat4 *orientation, float joints[], const Vec3 *foot);
     int solveInverse(const Mat4 *orientation, const Vec3 *foot, float joints[], const Vec3 *forward);
+
+    void serialize(DataView* data) {
+        serializev3(data, &offset);
+        data->writeSerial(&coxa);
+        data->writeSerial(&femur);
+        data->writeSerial(&tibia);
+    }
+
+    void deserialize(DataView* data) {
+        deserializev3(data, &offset);
+        data->readSerial(&coxa);
+        data->readSerial(&femur);
+        data->readSerial(&tibia);
+    }
 };
 
 #endif /* LEG_H */

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <uWS/uWS.h>
 #include "Server.h"
-#include "Protocol.h"
+#include "RobotProtocol.h"
 
 using namespace uWS;
 
@@ -19,9 +19,9 @@ void Server::run(std::function<void(int)> step, int millis) {
 
     Hub h;
     std::string response = "Hello!"; 
-    Protocol p;
+    RobotProtocol p;
     
-    std::vector<char> buffer;
+    std::vector<char> buffer(128);
 
     // struct for the user data in the simulation step
     struct timerData {
@@ -45,6 +45,7 @@ void Server::run(std::function<void(int)> step, int millis) {
         try {
             readBytes = p.handleMessage(message, length, buffer.data(), (size_t)buffer.size());
         } catch (std::out_of_range e) {
+            cout << "client overran their buffer" << endl;
             ws->close();
         }
 

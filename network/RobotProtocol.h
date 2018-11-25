@@ -1,48 +1,58 @@
+#ifndef ROBOT_PROTOCOL_H
+#define ROBOT_PROTOCOL_H
+
+#include "../robot/Robot.h"
 #include "Protocol.h"
 
-// control
-Serializable* controlJoints(DataView* it);
-Serializable* controlFeet(DataView* it);
-Serializable* controlFootPaths(DataView* it);
-Serializable* controlVelocity(DataView* it);
-Serializable* controlNavigationPath(DataView* it);
-Serializable* controlDestination(DataView* it);
+class RobotProtocol : public Protocol {
+public:
 
-// parameters
-Serializable* isThisAPigeon(DataView* it) {
-    return nullptr;
-}
-// states
+    Robot* robot = nullptr; // this shit doesn't work because I made my functions static
 
-Serializable* echo(DataView* it) {
-    return nullptr;
-}
+    // I need to turn my functions into functors. after all, that's how I'm using them
+    // control
+    void controlJoints(DataView& in, DataView& out);
+    void controlFeet(DataView& in, DataView& out);
+    void controlFootPaths(DataView& in, DataView& out);
+    void controlVelocity(DataView& in, DataView& out);
+    void controlNavigationPath(DataView& in, DataView& out);
+    void controlDestination(DataView& in, DataView& out);
 
-enum Control {
-    joints = 100,
-    feet,
-    footPaths,
-    velocity,
-    navigation,
-    destination,
+    // parameters
+    void getBody(DataView& in, DataView& out) {
+        out.writeSerial(robot->getBody());
+    }
+    void isThisAPigeon(DataView& in, DataView& out) {
+    }
+    // states
+
+    void echo(DataView& in, DataView& out);
+
+    enum Control {
+        joints = 100,
+        feet,
+        footPaths,
+        velocity,
+        navigation,
+        destination,
+    };
+
+    enum Parameters {
+        pigeon = 200,
+    };
+
+    void handle(uint16_t controlCode, DataView& in, DataView& out) {
+        switch (controlCode) {
+            case Control::joints: return controlJoints(in, out);
+            case Control::feet: return controlFeet(in, out);
+            case Control::footPaths: return controlFootPaths(in, out);
+            case Control::velocity: return controlVelocity(in, out);
+            case Control::navigation: return controlNavigationPath(in, out);
+            case Control::destination: return controlDestination(in, out);
+            case Parameters::pigeon: return isThisAPigeon(in, out);
+            case 0x4141: return echo(in, out);
+        }
+    }
 };
 
-enum Parameters {
-    pigeon = 200,
-};
-
-Protocol::Protocol() {
-
-    addProcedure(Control::joints, controlJoints);
-    addProcedure(Control::feet, controlJoints);
-    addProcedure(Control::footPaths, controlJoints);
-    addProcedure(Control::velocity, controlJoints);
-    addProcedure(Control::navigation, controlJoints);
-    addProcedure(Control::destination, controlJoints);
-
-    addProcedure(Parameters::pigeon, isThisAPigeon);
-
-    //AA
-    addProcedure(0x4141, echo);
-}
-
+#endif /* ROBOT_PROTOCOL_H */
