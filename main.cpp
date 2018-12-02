@@ -14,6 +14,7 @@
 #include "animation/Bezier3Channel.h"
 #include "robot/Robot.h"
 #include "network/Server.h"
+#include "network/RobotProtocol.h"
 #include "helper/SerializableTest.h"
 #include "animation/AnimationJson.h"
 #include "animation/RobotClip.h"
@@ -129,7 +130,8 @@ int main(int argc, char** argv) {
 
     // test server
     cout << "testing server" << endl;
-    Server server;
+    RobotProtocol protocol(robot);
+    Server server(protocol);
     server.run([&robot](int millis) {
         robot.simulationStep(((float) millis) / 1000);
     }, 20);

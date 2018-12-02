@@ -15,14 +15,15 @@
 #define SERVER_H
 
 #include <functional>
+#include "Protocol.h"
 
 class Server {
 public:
-    Server();
-    virtual ~Server();
+    Server(Protocol& protocol): protocol(protocol) {};
     
     void run(std::function<void(int)> step, int millis);
 private:
+    Protocol& protocol;
 };
 
 /*

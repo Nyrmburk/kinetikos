@@ -5,12 +5,6 @@
 
 using namespace uWS;
 
-Server::Server() {
-}
-
-Server::~Server() {
-}
-
 // check out serveEventSource
 // because I need to have some sort of simulation data transmitted to the client on an interval
 // this is an example on that feature
@@ -18,10 +12,11 @@ Server::~Server() {
 void Server::run(std::function<void(int)> step, int millis) {
 
     Hub h;
-    std::string response = "Hello!"; 
-    RobotProtocol p;
+    std::string response = "Hello!";
+
+    Protocol& p = this->protocol;
     
-    std::vector<char> buffer(128);
+    std::vector<char> buffer(1024 * 1024);
 
     // struct for the user data in the simulation step
     struct timerData {
@@ -48,6 +43,8 @@ void Server::run(std::function<void(int)> step, int millis) {
             cout << "client overran their buffer" << endl;
             ws->close();
         }
+
+        cout << "wrote out " << readBytes << " bytes." << endl;
 
         ws->send(buffer.data(), readBytes, opCode); 
     });

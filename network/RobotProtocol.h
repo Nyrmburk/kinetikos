@@ -6,8 +6,9 @@
 
 class RobotProtocol : public Protocol {
 public:
+    RobotProtocol(Robot& robot) : robot(robot) {}
 
-    Robot* robot = nullptr; // this shit doesn't work because I made my functions static
+    Robot& robot;
 
     // I need to turn my functions into functors. after all, that's how I'm using them
     // control
@@ -20,7 +21,7 @@ public:
 
     // parameters
     void getBody(DataView& in, DataView& out) {
-        out.writeSerial(robot->getBody());
+        out.writeSerial(robot.getBody());
     }
     void isThisAPigeon(DataView& in, DataView& out) {
     }
@@ -29,7 +30,7 @@ public:
     void echo(DataView& in, DataView& out);
 
     enum Control {
-        joints = 100,
+        joints = 200,
         feet,
         footPaths,
         velocity,
@@ -38,7 +39,8 @@ public:
     };
 
     enum Parameters {
-        pigeon = 200,
+        body = 100,
+        pigeon = 300,
     };
 
     void handle(uint16_t controlCode, DataView& in, DataView& out) {
@@ -49,6 +51,7 @@ public:
             case Control::velocity: return controlVelocity(in, out);
             case Control::navigation: return controlNavigationPath(in, out);
             case Control::destination: return controlDestination(in, out);
+            case Parameters::body: return getBody(in, out);
             case Parameters::pigeon: return isThisAPigeon(in, out);
             case 0x4141: return echo(in, out);
         }
