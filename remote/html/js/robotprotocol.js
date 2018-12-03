@@ -46,8 +46,9 @@ class RobotProtocol extends Protocol {
 	}
 
 	controlJoints(data) {
-		// hey!
-		console.log("hey!");
+		for (var i = 0; i < this.robot.body.legs.length * 3; i++) {
+			this.robot.joints[i] = data.getFloat32();
+		}
 	}
 
 	// request for the robot layout to be sent

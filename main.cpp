@@ -8,6 +8,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <cmath>
+
 #include "matrix/vec3.h"
 #include "animation/Tween.h"
 #include "animation/Vec3Channel.h"
@@ -131,8 +133,15 @@ int main(int argc, char** argv) {
     // test server
     cout << "testing server" << endl;
     Server server(robot);
+    float j = 0;
     server.run([&](int millis) {
         robot.simulationStep(((float) millis) / 1000);
+        j += 0.05f;
+        for (int i = 0; i < legsCount; i++) {
+            joints[i].joints[0] = (1 + sin(j)) / 2;
+            joints[i].joints[1] = (1 + sin(j)) / 2;
+            joints[i].joints[2] = (1 + sin(j)) / 2;
+        }
         server.publish(server.Control::joints, server.Control::joints, [&](DataView& out){
                 for (int i = 0; i < legsCount; i++) {
                     out.writeSerial(&joints[i]);

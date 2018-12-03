@@ -1,4 +1,4 @@
-function Renderer3d(container) {
+function Renderer3d(container, robot) {
 	if (!WEBGL.isWebGLAvailable()) {
     	var warning = WEBGL.getWebGLErrorMessage();
 	    // document.getElementById('container').appendChild(warning);
@@ -7,8 +7,11 @@ function Renderer3d(container) {
 	}
 
 	this.container = container;
+	this.robot = robot;
+	this.bodyDisplay;
 
 	var controls, gui;
+
 	this.resolution = new THREE.Vector2();
 	this.scene = new THREE.Scene();
 
@@ -95,15 +98,15 @@ function generateFloor(gridCount, gridSpacing) {
 
 Renderer3d.prototype.setRobot = function(robot) {
 	this.robot = robot;
-	var bodyDisplay = this.getBodyDisplay(robot.body);
-	this.scene.add(bodyDisplay);
-	this.animateBody(robot.body, [
+	this.bodyDisplay = this.getBodyDisplay(robot.body);
+	this.scene.add(this.bodyDisplay);
+	/*this.animateBody(robot.body, [
 			0.5, 0.5, 0.5,
 			0.5, 0.5, 0.5,
 			0.5, 0.5, 0.5,
 			0.5, 0.5, 0.5,
 			0.5, 0.5, 0.5,
-			0.5, 0.5, 0.5], bodyDisplay);
+			0.5, 0.5, 0.5], bodyDisplay);*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +156,9 @@ Renderer3d.prototype.getVelocityDisplay = function() {
 
 Renderer3d.prototype.getBodyDisplay = function(body) {
 	var bodyGroup = new THREE.Group();
+	bodyGroup.name = "body";
 	bodyGroup.matrixAutoUpdate = false;
+
 	for (var i = 0; i < body.legs.length; i++) {
 		var leg = body.legs[i];
 		var geometry = new THREE.Geometry();
@@ -176,8 +181,8 @@ Renderer3d.prototype.getBodyDisplay = function(body) {
 
 Renderer3d.prototype.getLegDisplay = function(leg, index) {
 	var legGroup = new THREE.Group();
-	legGroup.matrixAutoUpdate = false;
 	legGroup.name = "leg" + index;
+	legGroup.matrixAutoUpdate = false;
 
 	var coxa = this.getCoxaDisplay(leg.coxa);
 	legGroup.add(coxa);
@@ -261,6 +266,7 @@ Renderer3d.prototype.getrobotDisplay = function() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Renderer3d.prototype.animateBody = function(body, joints, bodyGroup) {
+//	console.log(joints);
 	for (var i = 0; i < body.legs.length; i++) {
 		var matrix = new THREE.Matrix4();
 		var legObject = bodyGroup.getObjectByName("leg" + i);
@@ -373,7 +379,7 @@ Renderer3d.prototype.animateLegs = function(bodyGroup) {
 }
 
 Renderer3d.prototype.render = function() {
-	//this.animateLegs(this.bodyGroup);
+	this.animateBody(this.robot.body, this.robot.joints, this.bodyDisplay);
 	this.renderer.render(this.scene, this.camera);
 	this.stats.update();
 }
