@@ -21,6 +21,8 @@ Robot::Robot() {
 }
 
 Robot::~Robot() {
+    delete[] joints;
+    delete[] feet;
 }
 
 Body* Robot::getBody() {

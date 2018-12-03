@@ -11,69 +11,76 @@ var control = {
 	destination: 205
 }
 
-RobotProtocol.prototype = Object.create(Protocol.prototype);
-function RobotProtocol(robot, renderer) {
-	Protocol.call(this);
-	this.robot = robot;
-	this.renderer = renderer;
-}
-
-RobotProtocol.prototype.handle = function(controlCode, dataIn, dataOut) {
-	switch (controlCode) {
-		case control.joints: return this.controlJoints(dataIn, dataOut);
-		case control.feet: return this.controlFeet(dataIn, dataOut);
-		case control.footPaths: return this.controlFootPaths(dataIn, dataOut);
-		case control.velocity: return this.controlVelocity(dataIn, dataOut);
-		case control.navigation: return this.controlNavigationPath(dataIn, dataOut);
-		case control.destination: return this.controlDestination(dataIn, dataOut);
-		case parameters.body: return this.onGetBody(dataIn, dataOut);
+class RobotProtocol extends Protocol {
+	constructor(robot, renderer) {
+		super();
+		this.robot = robot;
+		this.renderer = renderer;
 	}
-}
 
-RobotProtocol.prototype.onopen = function(evt) {
-	console.log("socket opened");
-	this.requestBody();
-}
+	handle(opcode, data) {
+		switch (opcode) {
+			case control.joints: return this.controlJoints(data);
+			case control.feet: return this.controlFeet(data);
+			case control.footPaths: return this.controlFootPaths(data);
+			case control.velocity: return this.controlVelocity(data);
+			case control.navigation: return this.controlNavigationPath(data);
+			case control.destination: return this.controlDestination(data);
+			case parameters.body: return this.onGetBody(data);
+		}
+	}
 
-RobotProtocol.prototype.onclose = function(evt) {
-	console.log("socket closed");
-}
+	onopen(evt) {
+		console.log("socket opened");
+		this.requestBody();
+		this.subscribe(this.Opcode.opSubscribe, control.joints);
+	}
 
-RobotProtocol.prototype.controlJoints = function(dataIn, dataOut) {
-	// hey!
-}
+	onclose(evt) {
+		console.log("socket closed");
+	}
 
+	subscribe(opcode, roomId) {
+		var s = {serialize: function(data) {data.setUint16(roomId)}};
+		this.sendSerial(opcode, s);
+	}
 
-// request for the robot layout to be sent
-RobotProtocol.prototype.requestBody = function() {
-	this.send(parameters.body);
-}
+	controlJoints(data) {
+		// hey!
+		console.log("hey!");
+	}
 
-// create the model based on the layout information given here
-RobotProtocol.prototype.onGetBody = function(dataIn, dataOut) {
-	this.robot.body.deserialize(dataIn);
-	renderer.setRobot(this.robot);
-}
+	// request for the robot layout to be sent
+	requestBody() {
+		this.sendSerial(parameters.body);
+	}
 
-// request a full version of the map
-function requestWorldMap() {
-	//network.send("worldMap", "");
-}
+	// create the model based on the layout information given here
+	onGetBody(data) {
+		this.robot.body.deserialize(data);
+		renderer.setRobot(this.robot);
+	}
 
-// tell the robot to move to a certain location
-function setDestination(destination) {
-	//network.send("destination", destination);
-}
+	// request a full version of the map
+	requestWorldMap() {
+		//network.send("worldMap", "");
+	}
 
-// start requesting all chunks relative to body location
-function onGetWorldMap(map) {
+	// tell the robot to move to a certain location
+	setDestination(destination) {
+		//network.send("destination", destination);
+	}
 
-}
+	// start requesting all chunks relative to body location
+	onGetWorldMap(map) {
 
-// somehow determine if it is worth updating the current map
-// network saturation or some shit
-function onWorldChange(location) {
+	}
 
+	// somehow determine if it is worth updating the current map
+	// network saturation or some shit
+	onWorldChange(location) {
+
+	}
 }
 
 // update the view with new data

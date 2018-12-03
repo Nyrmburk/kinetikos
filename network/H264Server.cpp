@@ -1,6 +1,5 @@
 #include <uWS/uWS.h>
 #include "H264Server.h"
-#include "Protocol.h"
 
 using namespace uWS;
 

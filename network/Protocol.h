@@ -1,41 +1,114 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#include <cstdint>
 #include <map>
-#include <functional>
+#include <vector>
+
 #include "../helper/Serializable.h"
 
-class Protocol;
-typedef Serializable* (Procedure)(DataView* it);
+#define ROOM_ALL 0
 
+template <typename T>
 class Protocol {
 public:
-    int handleMessage(
-            const char* dataIn, const size_t sizeIn,
-            char* dataOut, const size_t sizeOut) {
+    Protocol(size_t size = 1024 * 1024): buffer(size) {}
 
-        DataView in(const_cast<char*>(dataIn), sizeIn);
-        DataView out(dataOut, sizeOut);
+    enum Opcode {
+        opPublish = 10,
+        opSubscribe,
+        opUnsubscribe,
+    };
 
-        // get control code
-        uint16_t controlCode = in.readU16();
-        out.writeU16(controlCode);
+    virtual void handle(T& remote, uint16_t opcode, DataView& data) = 0;
 
-        // handle message in implementation
-        handle(controlCode, in, out);
-
-        // check if data has been written
-        if (out.getIndex() == size16) {
-            return 0; // no data written so returning early
+    void handleMessage(T& remote, const char* dataIn, const size_t sizeIn) {
+        DataView data(const_cast<char*>(dataIn), sizeIn);
+        uint16_t opcode = data.readU16();
+ 
+        uint16_t roomId = 0;
+        switch(opcode) {
+            case opPublish:
+                roomId = data.readU16();
+                publish(roomId, data);
+                break;
+            case opSubscribe:
+                roomId = data.readU16();
+                subscribe(roomId, remote);
+                break;
+            case opUnsubscribe:
+                roomId = data.readU16();
+                unsubscribe(roomId, remote);
+                break;
+            default:
+                return handle(remote, opcode, data);
         }
-
-        return out.getIndex();
     }
 
-protected:
-    // easy handler for implementation
-    virtual void handle(uint16_t controlCode, DataView& in, DataView& out) = 0;
-};
+    virtual void send(T& remote, DataView& data) = 0;
+    void send(T& remote, uint16_t opcode, std::function<void(DataView&)> write) {
+        // use internal buffer
+        DataView data(buffer.data(), buffer.size());
+        data.writeU16(opcode);
+        write(data);
+        send(remote, data);
+    }
 
+    void send(T& remote, uint16_t opcode, Serializable* s) {
+        send(remote, opcode, [s](DataView& out){s->serialize(&out);});
+    }
+
+    void onConnect(T& remote) {
+        subscribe(ROOM_ALL, remote);
+    }
+
+    void onDisconnect(T& remote) {
+        unsubscribeAll(remote);
+    }
+
+    void publish(uint16_t roomId, DataView& data) {
+        vector<T>& subscribers = rooms[roomId];
+
+        for (size_t i = 0; i < subscribers.size(); i++) {
+            send(subscribers[i], data);
+        }
+    }
+
+    void publish(uint16_t roomId, uint16_t opcode, std::function<void(DataView&)> write) {
+        DataView data(buffer.data(), buffer.size());
+        data.writeU16(opcode);
+        write(data);
+        publish(roomId, data);
+    }
+
+    void publish(uint16_t roomId, uint16_t opcode, Serializable* s) {
+        publish(roomId, opcode, [s](DataView& out){s->serialize(&out);});
+    }
+
+    void subscribe(uint16_t roomId, T& subscriber) {
+        vector<T>& subscribers = rooms[roomId];
+        subscribers.push_back(subscriber);
+        cout << "subscribed to room id #" << roomId << endl;
+    }
+
+    void unsubscribe(uint16_t roomId, T& subscriber) {
+        cout << "unsubscribed from room id #" << roomId << endl;
+        vector<T>& subscribers = rooms[roomId];
+        subscribers.erase(
+                std::remove(subscribers.begin(), subscribers.end(), subscriber),
+                subscribers.end());
+    }
+
+    void unsubscribeAll(T& subscriber) {
+        for (auto it = rooms.begin(); it != rooms.end(); it++) {
+            cout << "unsubscribed from room id #" << it->first << endl;
+            vector<T>& subscribers = it->second;
+            subscribers.erase(
+                    std::remove(subscribers.begin(), subscribers.end(), subscriber),
+                    subscribers.end());
+        }
+    }
+private:
+    map<uint16_t, vector<T>> rooms;
+    vector<char> buffer;
+};
 #endif /* PROTOCOL_H */

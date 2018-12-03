@@ -15,7 +15,7 @@ class Serializable;
 
 class DataView {
 public:
-    DataView(char* data, const size_t size) :
+    DataView(char* data, size_t size) :
             size{size},
             data{data} {}
 
@@ -45,6 +45,10 @@ public:
 
     size_t getSize() {
         return size;
+    }
+
+    char* getBuffer() {
+        return data;
     }
 
     // 8 bit

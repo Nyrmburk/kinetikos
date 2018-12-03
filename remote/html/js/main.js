@@ -29,8 +29,7 @@ window.onload = function() {
 	//streamPlayer.connect(videoSocket);
 	//streamPlayer.connect(getUri(3000));
 
-	var protocol = new RobotProtocol(robot, renderer);
-	this.client = new Client(protocol, new WebSocket(getUri(8080)));
+	this.client = new Client(new WebSocket(getUri(8080)), robot);
 
 	render();
 }

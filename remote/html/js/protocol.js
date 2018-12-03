@@ -1,5 +1,11 @@
 function Protocol() {
-	this.buffer = new DataView2(new ArrayBuffer(1024*1024));
+	this.buffer = new ArrayBuffer(1024, 1024);
+
+	this.Opcode = {
+		opPublish:     10,
+        opSubscribe:   11,
+        opUnsubscribe: 12
+	}
 }
 
 Protocol.prototype.handleMessage = function(dataIn) {
@@ -12,14 +18,13 @@ Protocol.prototype.handleMessage = function(dataIn) {
 	this.handle(controlCode, reader);
 }
 
-Protocol.prototype.send = function(controlCode, serial) {
-	this.buffer.rewind();
-	this.buffer.setUint16(controlCode);
+Protocol.prototype.sendSerial = function(controlCode, serial) {
+	var data = new DataView2(this.buffer);
+	data.setUint16(controlCode);
 
 	if (serial) {
-		serial.serialize(this.buffer);
+		serial.serialize(data);
 	}
 	
-	var bytesWritten = this.buffer.getIndex();
-	this.client.send(this.buffer.buffer.slice(0, bytesWritten));
+	this.send(data);
 }

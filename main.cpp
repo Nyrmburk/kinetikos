@@ -130,11 +130,13 @@ int main(int argc, char** argv) {
 
     // test server
     cout << "testing server" << endl;
-    RobotProtocol protocol(robot);
-    Server server(protocol);
-    server.run([&robot](int millis) {
+    Server server(robot);
+    server.run([&](int millis) {
         robot.simulationStep(((float) millis) / 1000);
+        server.publish(server.Control::joints, server.Control::joints, [&](DataView& out){
+                for (int i = 0; i < legsCount; i++) {
+                    out.writeSerial(&joints[i]);
+                }});
     }, 20);
-    
     return 0;
 }

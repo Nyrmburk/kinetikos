@@ -4,7 +4,8 @@
 #include "../robot/Robot.h"
 #include "Protocol.h"
 
-class RobotProtocol : public Protocol {
+template <typename T>
+class RobotProtocol : public Protocol<T> {
 public:
     RobotProtocol(Robot& robot) : robot(robot) {}
 
@@ -12,22 +13,20 @@ public:
 
     // I need to turn my functions into functors. after all, that's how I'm using them
     // control
-    void controlJoints(DataView& in, DataView& out);
-    void controlFeet(DataView& in, DataView& out);
-    void controlFootPaths(DataView& in, DataView& out);
-    void controlVelocity(DataView& in, DataView& out);
-    void controlNavigationPath(DataView& in, DataView& out);
-    void controlDestination(DataView& in, DataView& out);
+    void controlJoints(T& remote, uint16_t opcode, DataView& data);
+    void controlFeet(T& remote, uint16_t opcode, DataView& data);
+    void controlFootPaths(T& remote, uint16_t opcode, DataView& data);
+    void controlVelocity(T& remote, uint16_t opcode, DataView& data);
+    void controlNavigationPath(T& remote, uint16_t opcode, DataView& data);
+    void controlDestination(T& remote, uint16_t opcode, DataView& data);
 
     // parameters
-    void getBody(DataView& in, DataView& out) {
-        out.writeSerial(robot.getBody());
+    void getBody(T& remote, uint16_t opcode, DataView& data) {
+        this->send(remote, opcode, robot.getBody());
     }
-    void isThisAPigeon(DataView& in, DataView& out) {
+    void isThisAPigeon(T& remote, uint16_t opcode, DataView& data) {
     }
     // states
-
-    void echo(DataView& in, DataView& out);
 
     enum Control {
         joints = 200,
@@ -43,19 +42,20 @@ public:
         pigeon = 300,
     };
 
-    void handle(uint16_t controlCode, DataView& in, DataView& out) {
-        switch (controlCode) {
-            case Control::joints: return controlJoints(in, out);
-            case Control::feet: return controlFeet(in, out);
-            case Control::footPaths: return controlFootPaths(in, out);
-            case Control::velocity: return controlVelocity(in, out);
-            case Control::navigation: return controlNavigationPath(in, out);
-            case Control::destination: return controlDestination(in, out);
-            case Parameters::body: return getBody(in, out);
-            case Parameters::pigeon: return isThisAPigeon(in, out);
-            case 0x4141: return echo(in, out);
+    void handle(T& remote, uint16_t opcode, DataView& data) {
+        switch (opcode) {
+            case Control::joints: return controlJoints(remote, opcode, data);
+            case Control::feet: return controlFeet(remote, opcode, data);
+            case Control::footPaths: return controlFootPaths(remote, opcode, data);
+            case Control::velocity: return controlVelocity(remote, opcode, data);
+            case Control::navigation: return controlNavigationPath(remote, opcode, data);
+            case Control::destination: return controlDestination(remote, opcode, data);
+            case Parameters::body: return getBody(remote, opcode, data);
+            case Parameters::pigeon: return isThisAPigeon(remote, opcode, data);
         }
     }
 };
+
+#include "ControlProtocol.tpp"
 
 #endif /* ROBOT_PROTOCOL_H */
