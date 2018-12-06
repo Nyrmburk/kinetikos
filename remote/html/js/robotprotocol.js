@@ -34,6 +34,7 @@ class RobotProtocol extends Protocol {
 		console.log("socket opened");
 		this.requestBody();
 		this.subscribe(this.Opcode.opSubscribe, control.joints);
+		this.subscribe(this.Opcode.opSubscribe, control.feet);
 	}
 
 	onclose(evt) {
@@ -51,6 +52,14 @@ class RobotProtocol extends Protocol {
 		}
 	}
 
+	controlFeet(data) {
+		for (var i = 0; i < this.robot.body.legs.length; i++) {
+			this.robot.feet[i].x = data.getFloat32();
+			this.robot.feet[i].y = data.getFloat32();
+			this.robot.feet[i].z = data.getFloat32();
+		}
+	}
+
 	// request for the robot layout to be sent
 	requestBody() {
 		this.sendSerial(parameters.body);
@@ -59,6 +68,9 @@ class RobotProtocol extends Protocol {
 	// create the model based on the layout information given here
 	onGetBody(data) {
 		this.robot.body.deserialize(data);
+		for (var i = 0; i < this.robot.body.legs.length; i++) {
+			this.robot.feet[i] = new THREE.Vector3();
+		}
 		renderer.setRobot(this.robot);
 	}
 

@@ -13,7 +13,7 @@
 Leg::Leg() {
 }
 
-void Leg::solveForward(const Mat4 *orientation, float joints[], const Vec3 *foot) {
+void Leg::solveForward(const Mat4 *orientation, const Joints* joints, Vec3 *foot) {
 
     Mat4 matrix;
 
@@ -22,18 +22,14 @@ void Leg::solveForward(const Mat4 *orientation, float joints[], const Vec3 *foot
 
     translate(&matrix, &offset);
 
-    coxa.solve(&COXA_AXIS, joints[0], &matrix);
-    femur.solve(&FEMUR_AXIS, joints[1], &matrix);
-    tibia.solve(&TIBIA_AXIS, joints[2], &matrix);
+    coxa.solve(&COXA_AXIS, joints->coxa, &matrix);
+    femur.solve(&FEMUR_AXIS, joints->femur, &matrix);
+    tibia.solve(&TIBIA_AXIS, joints->tibia, &matrix);
 
-    setPosition(&matrix, foot);
+    getPosition(&matrix, foot);
 }
 
-int Leg::solveInverse(const Mat4 *orientation, const Vec3 *foot, float joints[], const Vec3 *forward) {
-
-    float *coxaJoint = &joints[0];
-    float *femurJoint = &joints[1];
-    float *tibiaJoint = &joints[2];
+int Leg::solveInverse(const Mat4 *orientation, const Vec3 *foot, Joints* joints, Vec3 *forward) {
 
     Mat4 matrix;
     setm4(&matrix, orientation);
@@ -46,10 +42,10 @@ int Leg::solveInverse(const Mat4 *orientation, const Vec3 *foot, float joints[],
     multm4v3(&inverse, foot, 1, &relativeFoot);
 
     // calculate coxa angle
-    *coxaJoint = atan2(relativeFoot.y, relativeFoot.x);
+    joints->coxa = atan2(relativeFoot.y, relativeFoot.x);
 
     // transform coxa away
-    rotate(&matrix, &COXA_AXIS, *coxaJoint);
+    rotate(&matrix, &COXA_AXIS, joints->coxa);
     Vec3 coxaTranslation = {coxa.length, 0, 0};
     translate(&matrix, &coxaTranslation);
     inversem4(&matrix, &inverse);
@@ -70,26 +66,26 @@ int Leg::solveInverse(const Mat4 *orientation, const Vec3 *foot, float joints[],
     float s2 = -sqrt(1 - c2 * c2);
 
     // calculate femur angle
-    *femurJoint = atan2(pz, px) - atan2(l2 * s2, l1 + l2 * c2);
+    joints->femur = atan2(pz, px) - atan2(l2 * s2, l1 + l2 * c2);
 
     // calculate tibia angle
-    *tibiaJoint = atan2(s2, c2);
+    joints->tibia = atan2(s2, c2);
 
     // normalize joints to their proper angles
-    *coxaJoint = angleDifference(coxa.angle, *coxaJoint);
-    *coxaJoint /= coxa.range;
-    *coxaJoint += 0.5f;
-    *coxaJoint = clamp(*coxaJoint, 0, 1);
+    joints->coxa = angleDifference(coxa.angle, joints->coxa);
+    joints->coxa /= coxa.range;
+    joints->coxa += 0.5f;
+    joints->coxa = clamp(joints->coxa, 0, 1);
 
-    *femurJoint = angleDifference(femur.angle, *femurJoint);
-    *femurJoint /= femur.range;
-    *femurJoint += 0.5f;
-    *femurJoint = clamp(*femurJoint, 0, 1);
+    joints->femur = angleDifference(femur.angle, joints->femur);
+    joints->femur /= femur.range;
+    joints->femur += 0.5f;
+    joints->femur = clamp(joints->femur, 0, 1);
 
-    *tibiaJoint = angleDifference(tibia.angle, *tibiaJoint);
-    *tibiaJoint /= tibia.range;
-    *tibiaJoint += 0.5f;
-    *tibiaJoint = clamp(*tibiaJoint, 0, 1);
+    joints->tibia = angleDifference(tibia.angle, joints->tibia);
+    joints->tibia /= tibia.range;
+    joints->tibia += 0.5f;
+    joints->tibia = clamp(joints->tibia, 0, 1);
 
     if (forward) {
         solveForward(orientation, joints, forward);

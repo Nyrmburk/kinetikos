@@ -18,6 +18,8 @@ Robot::Robot() {
 
     joints = new Joints[legsCount];
     feet = new Vec3[legsCount];
+
+    identitym4(&orientation);
 }
 
 Robot::~Robot() {

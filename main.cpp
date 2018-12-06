@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
     // test joints
     Joints* joints = robot.getJoints();
     for (int i = 0; i < legsCount; i++) {
-        cout << joints[i].joints[0] << ", " << joints[i].joints[1] << ", " << joints[i].joints[2] << endl;
+        cout << joints[i].coxa << ", " << joints[i].femur << ", " << joints[i].tibia << endl;
     }
     cout << endl;
 
@@ -138,14 +138,25 @@ int main(int argc, char** argv) {
         robot.simulationStep(((float) millis) / 1000);
         j += 0.05f;
         for (int i = 0; i < legsCount; i++) {
-            joints[i].joints[0] = (1 + sin(j)) / 2;
-            joints[i].joints[1] = (1 + sin(j)) / 2;
-            joints[i].joints[2] = (1 + sin(j)) / 2;
+            joints[i].coxa = (1 + sin(j)) / 2;
+            joints[i].femur = (1 + sin(j)) / 2;
+            joints[i].tibia = (1 + sin(j)) / 2;
+
+            body->legs[i].solveForward(robot.getOrientation(), &joints[i], &feet[i]);
+            //cout << feet[i].x << ":" << feet[i].y << ":" << feet[i].z << endl;
         }
+
         server.publish(server.Control::joints, server.Control::joints, [&](DataView& out){
-                for (int i = 0; i < legsCount; i++) {
-                    out.writeSerial(&joints[i]);
-                }});
+            for (int i = 0; i < legsCount; i++) {
+                out.writeSerial(&joints[i]);
+            }
+        });
+
+        server.publish(server.Control::feet, server.Control::feet, [&](DataView& out){
+            for (int i = 0; i < legsCount; i++) {
+                serializev3(&out, &feet[i]);
+            }
+        });
     }, 20);
     return 0;
 }

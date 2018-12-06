@@ -18,6 +18,7 @@
 #include "../helper/Serializable.h"
 #include "../matrix/vec3.h"
 #include "../matrix/MatSerialize.h"
+#include "../control/Joints.h"
 
 #define BONES_PER_LEG 3
 
@@ -34,8 +35,8 @@ public:
     Bone femur;
     Bone tibia;
     
-    void solveForward(const Mat4 *orientation, float joints[], const Vec3 *foot);
-    int solveInverse(const Mat4 *orientation, const Vec3 *foot, float joints[], const Vec3 *forward);
+    void solveForward(const Mat4 *orientation, const Joints* joints, Vec3 *foot);
+    int solveInverse(const Mat4 *orientation, const Vec3 *foot, Joints* joints, Vec3 *forward);
 
     void serialize(DataView* data) {
         serializev3(data, &offset);

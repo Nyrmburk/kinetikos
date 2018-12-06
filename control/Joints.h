@@ -8,14 +8,20 @@ class Robot;
 
 class Joints : public Serializable {
 public:
-    float joints[3] = {0};
+    float coxa = 0;
+    float femur = 0;
+    float tibia = 0;
 
     void serialize(DataView* writer) {
-        writer->writeFloats(joints, 3);
+        writer->writeFloat(coxa);
+        writer->writeFloat(femur);
+        writer->writeFloat(tibia);
     }
 
     void deserialize(DataView* reader) {
-        reader->readFloats(joints, 3);
+        coxa = reader->readFloat();
+        femur = reader->readFloat();
+        tibia = reader->readFloat();
     }
 };
 

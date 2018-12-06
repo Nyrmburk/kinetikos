@@ -29,7 +29,6 @@ function Renderer3d(container, robot) {
 		pose : false,
 	};
 
-	//this.bodyGroup = this.getBodyGroup(this.robot.body);
 	var terrain;
 
 	this.container.appendChild(this.renderer.domElement);
@@ -100,13 +99,10 @@ Renderer3d.prototype.setRobot = function(robot) {
 	this.robot = robot;
 	this.bodyDisplay = this.getBodyDisplay(robot.body);
 	this.scene.add(this.bodyDisplay);
-	/*this.animateBody(robot.body, [
-			0.5, 0.5, 0.5,
-			0.5, 0.5, 0.5,
-			0.5, 0.5, 0.5,
-			0.5, 0.5, 0.5,
-			0.5, 0.5, 0.5,
-			0.5, 0.5, 0.5], bodyDisplay);*/
+
+	for (var i = 0; i < robot.feet.length; i++) {
+		this.scene.add(this.getFootDisplay(robot.feet[i], i, 0x7f007f));
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,9 +220,9 @@ Renderer3d.prototype.getTibiaDisplay = function(bone) {
 	return tibia;
 }
 
-Renderer3d.prototype.getFootDisplay = function(foot, index) {
+Renderer3d.prototype.getFootDisplay = function(foot, index, color) {
 	var cubeGeometry = new THREE.BoxGeometry(5, 5, 5);
-	var material = new THREE.MeshBasicMaterial({color: 0x7f007f});
+	var material = new THREE.MeshBasicMaterial({color: color});
 	var foot = new THREE.Mesh(cubeGeometry, material);
 	foot.name = "foot" + index;
 	return foot;
@@ -299,6 +295,13 @@ Renderer3d.prototype.animateBody = function(body, joints, bodyGroup) {
         tibia.matrix.copy(matrix);
         matrix.makeRotationAxis(axis, tibiaAngle);
         tibia.matrix.multiply(matrix);
+	}
+}
+
+Renderer3d.prototype.animateRobot = function(scene, robot) {
+	for (var i = 0; i < robot.feet.length; i++) {
+		var foot = scene.getObjectByName("foot" + i);
+		foot.position.copy(robot.feet[i]);
 	}
 }
 
@@ -380,6 +383,7 @@ Renderer3d.prototype.animateLegs = function(bodyGroup) {
 
 Renderer3d.prototype.render = function() {
 	this.animateBody(this.robot.body, this.robot.joints, this.bodyDisplay);
+	this.animateRobot(this.scene, this.robot);
 	this.renderer.render(this.scene, this.camera);
 	this.stats.update();
 }
