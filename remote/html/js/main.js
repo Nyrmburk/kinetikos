@@ -47,31 +47,3 @@ function render() {
 	requestAnimationFrame(render);
 }
 
-// dumping ground
-/*
-var dict = {
-	body:onGetBody,
-	worldMap:onGetWorldMap,
-	worldChange:onWorldChange,
-	worldChunk:onGetWorldChunk,
-	dynamic:onGetDynamic
-};
-*/
-
-function initWebsockets() {
-	var uri = "ws://" + document.location.hostname + ":8080";
-	var socket = new WebSocket(uri, "bson-protocol");
-	//var network = new Network(dict, socket);
-
-	socket.onopen = function(evt) {
-		console.log("socket opened");
-
-		requestBody();
-		requestWorldMap();
-	};
-	socket.onclose = function(evt) {
-		console.log("socket closed");
-	};
-}
-
-

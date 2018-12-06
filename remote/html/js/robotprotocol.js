@@ -21,14 +21,14 @@ class RobotProtocol extends Protocol {
 
 	handle(opcode, data) {
 		switch (opcode) {
-			case control.joints: return this.controlJoints(data);
-			case control.feet: return this.controlFeet(data);
-			case control.footPaths: return this.controlFootPaths(data);
-			case control.orientation: return this.controlOrientation(data);
-			case control.velocity: return this.controlVelocity(data);
-			case control.navigation: return this.controlNavigationPath(data);
-			case control.destination: return this.controlDestination(data);
-			case parameters.body: return this.onGetBody(data);
+			case control.joints: return this.handleJoints(data);
+			case control.feet: return this.handleFeet(data);
+			case control.footPaths: return this.handleFootPaths(data);
+			case control.orientation: return this.handleOrientation(data);
+			case control.velocity: return this.handleVelocity(data);
+			case control.navigation: return this.handleNavigationPath(data);
+			case control.destination: return this.handleDestination(data);
+			case parameters.body: return this.handleBody(data);
 		}
 	}
 
@@ -49,13 +49,13 @@ class RobotProtocol extends Protocol {
 		this.sendSerial(opcode, s);
 	}
 
-	controlJoints(data) {
+	handleJoints(data) {
 		for (var i = 0; i < this.robot.body.legs.length * 3; i++) {
 			this.robot.joints[i] = data.getFloat32();
 		}
 	}
 
-	controlFeet(data) {
+	handleFeet(data) {
 		for (var i = 0; i < this.robot.body.legs.length; i++) {
 			this.robot.feet[i].x = data.getFloat32();
 			this.robot.feet[i].y = data.getFloat32();
@@ -63,7 +63,7 @@ class RobotProtocol extends Protocol {
 		}
 	}
 
-	controlOrientation(data) {
+	handleOrientation(data) {
 		for (var i = 0; i < 16; i++) {
 			this.robot.orientation.elements[i] = data.getFloat32();
 		}
@@ -75,65 +75,12 @@ class RobotProtocol extends Protocol {
 	}
 
 	// create the model based on the layout information given here
-	onGetBody(data) {
+	handleBody(data) {
 		this.robot.body.deserialize(data);
 		for (var i = 0; i < this.robot.body.legs.length; i++) {
 			this.robot.feet[i] = new THREE.Vector3();
 		}
 		renderer.setRobot(this.robot);
 	}
-
-	// request a full version of the map
-	requestWorldMap() {
-		//network.send("worldMap", "");
-	}
-
-	// tell the robot to move to a certain location
-	setDestination(destination) {
-		//network.send("destination", destination);
-	}
-
-	// start requesting all chunks relative to body location
-	onGetWorldMap(map) {
-
-	}
-
-	// somehow determine if it is worth updating the current map
-	// network saturation or some shit
-	onWorldChange(location) {
-
-	}
-}
-
-// update the view with new data
-function onGetWorldChunk(chunk) {
-
-}
-
-// update the model with robot state
-function onGetDynamic(dynamic) {
-	
-	if (robotContext.body == null)
-		return;
-
-	robotContext.body.orientation = dynamic.orientation;
-
-	robotContext.position.set(dynamic.position[0], dynamic.position[1], dynamic.position[2]);
-
-	robotContext.destination.set(dynamic.destination[0], dynamic.destination[1], dynamic.destination[2]);
-
-	robotContext.velocity.set(dynamic.velocity[0], dynamic.velocity[1]);
-
-	dynamic.joints.forEach(function(joint, i) {
-		robotContext.joints[i] = joint;
-	});
-
-	dynamic.feet.forEach(function(foot, i) {
-		robotContext.feet[i] = new THREE.Vector3(foot[0], foot[1], foot[2]);
-	});
-
-	dynamic.feetTargets.forEach(function(target, i) {
-		robotContext.feetTargets[i] = new THREE.Vector3(target[0], target[1], target[2]);
-	});
 }
 
