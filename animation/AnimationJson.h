@@ -125,6 +125,7 @@ public:
         for (int i = 0; i < TOTAL_SIZE_M4; i++) {
             mat.m[i] = docMat[i].GetFloat();
         }
+        transposem4(&mat, &mat);
     }
 
 private:

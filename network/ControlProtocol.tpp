@@ -12,6 +12,10 @@ void RobotProtocol<T>::controlFootPaths(T& remote, uint16_t opcode, DataView& da
 }
 
 template <typename T>
+void RobotProtocol<T>::controlOrientation(T& remote, uint16_t opcode, DataView& data) {
+}
+
+template <typename T>
 void RobotProtocol<T>::controlVelocity(T& remote, uint16_t opcode, DataView& data) {
 }
 

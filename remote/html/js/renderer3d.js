@@ -261,8 +261,8 @@ Renderer3d.prototype.getrobotDisplay = function() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Renderer3d.prototype.animateBody = function(body, joints, bodyGroup) {
-//	console.log(joints);
+Renderer3d.prototype.animateBody = function(robot, bodyGroup) {
+	var body = robot.body;
 	for (var i = 0; i < body.legs.length; i++) {
 		var matrix = new THREE.Matrix4();
 		var legObject = bodyGroup.getObjectByName("leg" + i);
@@ -270,6 +270,8 @@ Renderer3d.prototype.animateBody = function(body, joints, bodyGroup) {
 		var coxa = legObject.children[0];
 		var femur = coxa.children[0];
 		var tibia = femur.children[0];
+
+		var joints = robot.joints;
 
 		var leg = body.legs[i];
 		var coxaAngle = leg.coxa.angle - (joints[i * 3] - 0.5) * leg.coxa.range;
@@ -295,6 +297,10 @@ Renderer3d.prototype.animateBody = function(body, joints, bodyGroup) {
         tibia.matrix.copy(matrix);
         matrix.makeRotationAxis(axis, tibiaAngle);
         tibia.matrix.multiply(matrix);
+	}
+
+	if (bodyGroup) {
+		bodyGroup.matrix.copy(robot.orientation);
 	}
 }
 
@@ -382,7 +388,7 @@ Renderer3d.prototype.animateLegs = function(bodyGroup) {
 }
 
 Renderer3d.prototype.render = function() {
-	this.animateBody(this.robot.body, this.robot.joints, this.bodyDisplay);
+	this.animateBody(this.robot, this.bodyDisplay);
 	this.animateRobot(this.scene, this.robot);
 	this.renderer.render(this.scene, this.camera);
 	this.stats.update();

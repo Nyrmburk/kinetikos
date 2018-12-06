@@ -47,7 +47,7 @@ extern "C" {
     void multm4v4(const Mat4 *from, const Vec4 *to, Vec4 *result);
     float multm4v3(const Mat4 *from, const Vec3 *to, float w, Vec3 *result);
     float dotm4(const Mat4 *from, const Mat4 *to);
-    void transposem4(const Mat4 *from, const Mat4 *to, Mat4 *result);
+    void transposem4(const Mat4 *from, Mat4 *result);
     void tracem4(const Mat4 *from, const Mat4 *to, Mat4 *result);
     float determinantm4(const Mat4 *matrix);
     float inversem4(const Mat4 *matrix, Mat4 *result);

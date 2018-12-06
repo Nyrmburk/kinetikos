@@ -6,9 +6,10 @@ var control = {
 	joints:      200,
 	feet:        201,
 	footPaths:   202,
-	velocity:    203,
-	navigation:  204,
-	destination: 205
+	orientation: 203,
+	velocity:    204,
+	navigation:  205,
+	destination: 206
 }
 
 class RobotProtocol extends Protocol {
@@ -23,6 +24,7 @@ class RobotProtocol extends Protocol {
 			case control.joints: return this.controlJoints(data);
 			case control.feet: return this.controlFeet(data);
 			case control.footPaths: return this.controlFootPaths(data);
+			case control.orientation: return this.controlOrientation(data);
 			case control.velocity: return this.controlVelocity(data);
 			case control.navigation: return this.controlNavigationPath(data);
 			case control.destination: return this.controlDestination(data);
@@ -35,6 +37,7 @@ class RobotProtocol extends Protocol {
 		this.requestBody();
 		this.subscribe(this.Opcode.opSubscribe, control.joints);
 		this.subscribe(this.Opcode.opSubscribe, control.feet);
+		this.subscribe(this.Opcode.opSubscribe, control.orientation);
 	}
 
 	onclose(evt) {
@@ -57,6 +60,12 @@ class RobotProtocol extends Protocol {
 			this.robot.feet[i].x = data.getFloat32();
 			this.robot.feet[i].y = data.getFloat32();
 			this.robot.feet[i].z = data.getFloat32();
+		}
+	}
+
+	controlOrientation(data) {
+		for (var i = 0; i < 16; i++) {
+			this.robot.orientation.elements[i] = data.getFloat32();
 		}
 	}
 

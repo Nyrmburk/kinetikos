@@ -13,6 +13,6 @@ void serializev3(DataView* writer, const Vec3* vec);
 void deserializev3(DataView* reader, Vec3* vec);
 
 void serializem4(DataView* writer, const Mat4* mat);
-void serializem4(DataView* reader, Mat4* mat);
+void deserializem4(DataView* reader, Mat4* mat);
 
 #endif /* MAT_SERIALIZE_H */

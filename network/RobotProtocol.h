@@ -16,6 +16,7 @@ public:
     void controlJoints(T& remote, uint16_t opcode, DataView& data);
     void controlFeet(T& remote, uint16_t opcode, DataView& data);
     void controlFootPaths(T& remote, uint16_t opcode, DataView& data);
+    void controlOrientation(T& remote, uint16_t opcode, DataView& data);
     void controlVelocity(T& remote, uint16_t opcode, DataView& data);
     void controlNavigationPath(T& remote, uint16_t opcode, DataView& data);
     void controlDestination(T& remote, uint16_t opcode, DataView& data);
@@ -32,6 +33,7 @@ public:
         joints = 200,
         feet,
         footPaths,
+        orientation,
         velocity,
         navigation,
         destination,
@@ -47,6 +49,7 @@ public:
             case Control::joints: return controlJoints(remote, opcode, data);
             case Control::feet: return controlFeet(remote, opcode, data);
             case Control::footPaths: return controlFootPaths(remote, opcode, data);
+            case Control::orientation: return controlOrientation(remote, opcode, data);
             case Control::velocity: return controlVelocity(remote, opcode, data);
             case Control::navigation: return controlNavigationPath(remote, opcode, data);
             case Control::destination: return controlDestination(remote, opcode, data);

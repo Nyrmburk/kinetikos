@@ -79,7 +79,35 @@ float dotm4(const Mat4 *from, const Mat4 *to) {
     return dot;
 }
 
-void transposem4(const Mat4 *from, const Mat4 *to, Mat4 *result);
+void transposem4(const Mat4 *from, Mat4 *result) {
+    float *m = result->m;
+    float temp;
+
+    temp = from->m[1];
+    m[1] = from->m[4];
+    m[4] = temp;
+
+    temp = from->m[2];
+    m[2] = from->m[8];
+    m[8] = temp;
+
+    temp = from->m[3];
+    m[3] = from->m[12];
+    m[12] = temp;
+
+    temp = from->m[6];
+    m[6] = from->m[9];
+    m[9] = temp;
+
+    temp = from->m[7];
+    m[7] = from->m[13];
+    m[13] = temp;
+
+    temp = from->m[11];
+    m[11] = from->m[14];
+    m[14] = temp;
+}
+
 void tracem4(const Mat4 *from, const Mat4 *to, Mat4 *result);
 
 float determinantm4(const Mat4 *matrix) {
@@ -112,73 +140,76 @@ float inversem4(const Mat4 *matrix, Mat4 *result) {
 
     // inverse does not exist when determinant is 0
     if (determinant == 0) {
-        const float *m = matrix->m;
-        float *r = result->m;
-
-        r[0] = m[5] * m[10] * m[15] + m[9] * m[14] * m[7] + m[13] * m[6] * m[11];
-        r[0] -= m[5] * m[14] * m[11] + m[9] * m[6] * m[15] + m[13] * m[10] * m[7];
-        r[0] /= determinant;
-
-        r[4] = m[4] * m[14] * m[11] + m[8] * m[6] * m[15] + m[12] * m[10] * m[7];
-        r[4] -= m[4] * m[10] * m[15] + m[8] * m[14] * m[7] + m[12] * m[6] * m[11];
-        r[4] /= determinant;
-
-        r[8] = m[4] * m[9] * m[15] + m[8] * m[13] * m[7] + m[12] * m[5] * m[11];
-        r[8] -= m[4] * m[13] * m[11] + m[8] * m[5] * m[15] + m[12] * m[9] * m[7];
-        r[8] /= determinant;
-
-        r[12] = m[4] * m[13] * m[10] + m[8] * m[5] * m[14] + m[12] * m[9] * m[6];
-        r[12] -= m[4] * m[9] * m[14] + m[8] * m[13] * m[6] + m[12] * m[5] * m[10];
-        r[12] /= determinant;
-
-        r[1] = m[1] * m[14] * m[11] + m[9] * m[2] * m[15] + m[13] * m[10] * m[3];
-        r[1] -= m[1] * m[10] * m[15] + m[9] * m[14] * m[3] + m[13] * m[2] * m[11];
-        r[1] /= determinant;
-
-        r[5] = m[0] * m[10] * m[15] + m[8] * m[14] * m[3] + m[12] * m[2] * m[11];
-        r[5] -= m[0] * m[14] * m[11] + m[8] * m[2] * m[15] + m[12] * m[10] * m[3];
-        r[5] /= determinant;
-
-        r[9] = m[0] * m[13] * m[11] + m[8] * m[1] * m[15] + m[12] * m[9] * m[3];
-        r[9] -= m[0] * m[9] * m[15] + m[8] * m[13] * m[3] + m[12] * m[1] * m[11];
-        r[9] /= determinant;
-
-        r[13] = m[0] * m[9] * m[14] + m[8] * m[13] * m[2] + m[12] * m[1] * m[10];
-        r[13] -= m[0] * m[13] * m[10] + m[8] * m[1] * m[14] + m[12] * m[9] * m[2];
-        r[13] /= determinant;
-
-        r[2] = m[1] * m[6] * m[15] + m[5] * m[14] * m[3] + m[13] * m[2] * m[7];
-        r[2] -= m[1] * m[14] * m[7] + m[5] * m[2] * m[15] + m[13] * m[6] * m[3];
-        r[2] /= determinant;
-
-        r[6] = m[0] * m[14] * m[7] + m[4] * m[2] * m[15] + m[12] * m[6] * m[3];
-        r[6] -= m[0] * m[6] * m[15] + m[4] * m[14] * m[3] + m[12] * m[2] * m[7];
-        r[6] /= determinant;
-
-        r[10] = m[0] * m[5] * m[15] + m[4] * m[13] * m[3] + m[12] * m[1] * m[7];
-        r[10] -= m[0] * m[13] * m[7] + m[4] * m[1] * m[15] + m[12] * m[5] * m[3];
-        r[10] /= determinant;
-
-        r[14] = m[0] * m[13] * m[6] + m[4] * m[1] * m[14] + m[12] * m[5] * m[2];
-        r[14] -= m[0] * m[5] * m[14] + m[4] * m[13] * m[2] + m[12] * m[1] * m[6];
-        r[14] /= determinant;
-
-        r[3] = m[1] * m[10] * m[7] + m[5] * m[2] * m[11] + m[9] * m[6] * m[3];
-        r[3] -= m[1] * m[6] * m[11] + m[5] * m[10] * m[3] + m[9] * m[2] * m[7];
-        r[3] /= determinant;
-
-        r[7] = m[0] * m[6] * m[11] + m[4] * m[10] * m[3] + m[8] * m[2] * m[7];
-        r[7] -= m[0] * m[10] * m[7] + m[4] * m[2] * m[11] + m[8] * m[6] * m[3];
-        r[7] /= determinant;
-
-        r[11] = m[0] * m[9] * m[7] + m[4] * m[1] * m[11] + m[8] * m[5] * m[3];
-        r[11] -= m[0] * m[5] * m[11] + m[4] * m[9] * m[3] + m[8] * m[1] * m[7];
-        r[11] /= determinant;
-
-        r[15] = m[0] * m[5] * m[10] + m[4] * m[9] * m[2] + m[8] * m[1] * m[6];
-        r[15] -= m[0] * m[9] * m[6] + m[4] * m[1] * m[10] + m[8] * m[5] * m[2];
-        r[15] /= determinant;
+        return 0;
     }
+
+    const float *m = matrix->m;
+    float *r = result->m;
+
+    r[0] = m[5] * m[10] * m[15] + m[9] * m[14] * m[7] + m[13] * m[6] * m[11];
+    r[0] -= m[5] * m[14] * m[11] + m[9] * m[6] * m[15] + m[13] * m[10] * m[7];
+    r[0] /= determinant;
+
+    r[4] = m[4] * m[14] * m[11] + m[8] * m[6] * m[15] + m[12] * m[10] * m[7];
+    r[4] -= m[4] * m[10] * m[15] + m[8] * m[14] * m[7] + m[12] * m[6] * m[11];
+    r[4] /= determinant;
+
+    r[8] = m[4] * m[9] * m[15] + m[8] * m[13] * m[7] + m[12] * m[5] * m[11];
+    r[8] -= m[4] * m[13] * m[11] + m[8] * m[5] * m[15] + m[12] * m[9] * m[7];
+    r[8] /= determinant;
+
+    r[12] = m[4] * m[13] * m[10] + m[8] * m[5] * m[14] + m[12] * m[9] * m[6];
+    r[12] -= m[4] * m[9] * m[14] + m[8] * m[13] * m[6] + m[12] * m[5] * m[10];
+    r[12] /= determinant;
+
+    r[1] = m[1] * m[14] * m[11] + m[9] * m[2] * m[15] + m[13] * m[10] * m[3];
+    r[1] -= m[1] * m[10] * m[15] + m[9] * m[14] * m[3] + m[13] * m[2] * m[11];
+    r[1] /= determinant;
+
+    r[5] = m[0] * m[10] * m[15] + m[8] * m[14] * m[3] + m[12] * m[2] * m[11];
+    r[5] -= m[0] * m[14] * m[11] + m[8] * m[2] * m[15] + m[12] * m[10] * m[3];
+    r[5] /= determinant;
+
+    r[9] = m[0] * m[13] * m[11] + m[8] * m[1] * m[15] + m[12] * m[9] * m[3];
+    r[9] -= m[0] * m[9] * m[15] + m[8] * m[13] * m[3] + m[12] * m[1] * m[11];
+    r[9] /= determinant;
+
+    r[13] = m[0] * m[9] * m[14] + m[8] * m[13] * m[2] + m[12] * m[1] * m[10];
+    r[13] -= m[0] * m[13] * m[10] + m[8] * m[1] * m[14] + m[12] * m[9] * m[2];
+    r[13] /= determinant;
+
+    r[2] = m[1] * m[6] * m[15] + m[5] * m[14] * m[3] + m[13] * m[2] * m[7];
+    r[2] -= m[1] * m[14] * m[7] + m[5] * m[2] * m[15] + m[13] * m[6] * m[3];
+    r[2] /= determinant;
+
+    r[6] = m[0] * m[14] * m[7] + m[4] * m[2] * m[15] + m[12] * m[6] * m[3];
+    r[6] -= m[0] * m[6] * m[15] + m[4] * m[14] * m[3] + m[12] * m[2] * m[7];
+    r[6] /= determinant;
+
+    r[10] = m[0] * m[5] * m[15] + m[4] * m[13] * m[3] + m[12] * m[1] * m[7];
+    r[10] -= m[0] * m[13] * m[7] + m[4] * m[1] * m[15] + m[12] * m[5] * m[3];
+    r[10] /= determinant;
+
+    r[14] = m[0] * m[13] * m[6] + m[4] * m[1] * m[14] + m[12] * m[5] * m[2];
+    r[14] -= m[0] * m[5] * m[14] + m[4] * m[13] * m[2] + m[12] * m[1] * m[6];
+    r[14] /= determinant;
+
+    r[3] = m[1] * m[10] * m[7] + m[5] * m[2] * m[11] + m[9] * m[6] * m[3];
+    r[3] -= m[1] * m[6] * m[11] + m[5] * m[10] * m[3] + m[9] * m[2] * m[7];
+    r[3] /= determinant;
+
+    r[7] = m[0] * m[6] * m[11] + m[4] * m[10] * m[3] + m[8] * m[2] * m[7];
+    r[7] -= m[0] * m[10] * m[7] + m[4] * m[2] * m[11] + m[8] * m[6] * m[3];
+    r[7] /= determinant;
+
+    r[11] = m[0] * m[9] * m[7] + m[4] * m[1] * m[11] + m[8] * m[5] * m[3];
+    r[11] -= m[0] * m[5] * m[11] + m[4] * m[9] * m[3] + m[8] * m[1] * m[7];
+    r[11] /= determinant;
+
+    r[15] = m[0] * m[5] * m[10] + m[4] * m[9] * m[2] + m[8] * m[1] * m[6];
+    r[15] -= m[0] * m[9] * m[6] + m[4] * m[1] * m[10] + m[8] * m[5] * m[2];
+    r[15] /= determinant;
+
     return determinant;
 }
 
