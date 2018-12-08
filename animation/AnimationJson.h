@@ -109,10 +109,8 @@ public:
         Tween<void*>& base = getBaseTween(docTween);
 
         Bezier3::Node& node = *new Bezier3::Node();
-        node.point = new Vec3;
-        node.handle = new Vec3;
-        getVec3(docTween["point"], *node.point);
-        getVec3(docTween["handle"], *node.handle);
+        getVec3(docTween["point"], node.point);
+        getVec3(docTween["handle"], node.handle);
         
         return *new Tween<Bezier3::Node>(node, base.getTime(), base.getFunction());
     }

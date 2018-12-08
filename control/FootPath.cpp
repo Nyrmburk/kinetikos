@@ -7,8 +7,8 @@ void FootPathControl::control(Robot* robot, const Vec3* target, Bezier3Channel* 
     setv3s(0, 1, 0, handle);
 
     Bezier3::Node* node = new Bezier3::Node;
-    node->point = const_cast<Vec3*>(target);
-    node->handle = handle;
+    setv3(&node->point, target);
+    setv3(&node->handle, handle);
 
     Tween<Bezier3::Node> tween(*node, 0, easeLinear);
     returnPath->insertTween(tween);
