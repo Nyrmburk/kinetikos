@@ -22,6 +22,7 @@ public:
         this->feet = feet;
     }
 
+protected:
     void act(float time) {
         bodyChannel.act(time, *bodyOrientation); 
 

@@ -2,40 +2,40 @@
 	"body" : {
 		"legs" : [
 			{
-				"offset" : [35.0,-85.0,15.4],
-				"coxa" : {"length":27.98, "angle":-0.5016, "range":1.5708},
-				"femur" : {"length":60.0, "angle":0.5202, "range":-1.5708},
-				"tibia" : {"length":91.2, "angle":-2.1580, "range":1.5708}
+				"offset" : [38.0,-85.0,11.865],
+				"coxa" : {"length":33.7, "angle":-0.5016, "range":1.5708},
+				"femur" : {"length":70.0, "angle":1.0472, "range":-1.5708},
+				"tibia" : {"length":105.4, "angle":-1.5708, "range":1.5708}
 			},
 			{
-				"offset" : [45.0,0.0,15.4],
-				"coxa" : {"length":27.98, "angle":0.0, "range":1.5708},
-				"femur" : {"length":60.0, "angle":0.5202, "range":-1.5708},
-				"tibia" : {"length":91.2, "angle":-2.1580, "range":1.5708}
+				"offset" : [50.0,0.0,11.865],
+				"coxa" : {"length":33.7, "angle":0.0, "range":1.5708},
+				"femur" : {"length":70.0, "angle":1.0472, "range":-1.5708},
+				"tibia" : {"length":105.4, "angle":-1.5708, "range":1.5708}
 			},
 			{
-				"offset" : [35.0,85.0,15.4],
-				"coxa" : {"length":27.98, "angle":0.5016, "range":1.5708},
-				"femur" : {"length":60.0, "angle":0.5202, "range":-1.5708},
-				"tibia" : {"length":91.2, "angle":-2.1580, "range":1.5708}
+				"offset" : [38.0,85.0,11.865],
+				"coxa" : {"length":33.7, "angle":0.5016, "range":1.5708},
+				"femur" : {"length":70.0, "angle":1.0472, "range":-1.5708},
+				"tibia" : {"length":105.4, "angle":-1.5708, "range":1.5708}
 			},
 			{
-				"offset" : [-35.0,-85.0,15.4],
-				"coxa" : {"length":27.98, "angle":-2.6400, "range":1.5708},
-				"femur" : {"length":60.0, "angle":0.5202, "range":1.5708},
-				"tibia" : {"length":91.2, "angle":-2.1580, "range":-1.5708}
+				"offset" : [-38.0,-85.0,11.865],
+				"coxa" : {"length":33.7, "angle":-2.6400, "range":1.5708},
+				"femur" : {"length":70.0, "angle":1.0472, "range":1.5708},
+				"tibia" : {"length":105.4, "angle":-1.5708, "range":-1.5708}
 			},
 			{
-				"offset" : [-45.0,0.0,15.4],
-				"coxa" : {"length":27.98, "angle":3.1415, "range":1.5708},
-				"femur" : {"length":60.0, "angle":0.5202, "range":1.5708},
-				"tibia" : {"length":91.2, "angle":-2.1580, "range":-1.5708}
+				"offset" : [-50.0,0.0,11.865],
+				"coxa" : {"length":33.7, "angle":3.1415, "range":1.5708},
+				"femur" : {"length":70.0, "angle":1.0472, "range":1.5708},
+				"tibia" : {"length":105.4, "angle":-1.5708, "range":-1.5708}
 			},
 			{
-				"offset" : [-35.0,85.0,15.4],
-				"coxa" : {"length":27.98, "angle":2.6404, "range":1.5708},
-				"femur" : {"length":60.0, "angle":0.5202, "range":1.5708},
-				"tibia" : {"length":91.2, "angle":-2.1580, "range":-1.5708}
+				"offset" : [-38.0,85.0,11.865],
+				"coxa" : {"length":33.7, "angle":2.6404, "range":1.5708},
+				"femur" : {"length":70.0, "angle":1.0472, "range":1.5708},
+				"tibia" : {"length":105.4, "angle":-1.5708, "range":-1.5708}
 			}
 		],
 		"trim" : [

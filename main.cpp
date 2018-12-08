@@ -133,17 +133,20 @@ int main(int argc, char** argv) {
     // test setting home animation
     RobotClip home = animations.getAnimation("home");
     home.setTargets(robot.getOrientation(), feet);
-    home.act(0);
+    home.step(0);
 
     // test server
     cout << "testing server" << endl;
     Server server(robot);
     float j = 0;
     server.run([&](int millis) {
-        robot.simulationStep(((float) millis) / 1000);
+        float delta = ((float) millis / 1000);
+        robot.simulationStep(delta);
+
+        home.step(delta);
 
         j += 0.05f;
-        robot.getOrientation()->m[14] = 30 * sin(j) + 40;
+        //robot.getOrientation()->m[14] = 30 * sin(j) + 30;
 
         /*
         for (int i = 0; i < legsCount; i++) {
@@ -151,15 +154,16 @@ int main(int argc, char** argv) {
             joints[i].femur = (1 + sin(j)) / 2;
             joints[i].tibia = (1 + sin(j)) / 2;
 
-            //body->legs[i].solveForward(robot.getOrientation(), &joints[i], &feet[i]);
-            //cout << i << "::" << feet[i].x << ":" << feet[i].y << ":" << feet[i].z << endl;
+            body->legs[i].solveForward(robot.getOrientation(), &joints[i], &feet[i]);
+            cout << i << "::" << feet[i].x << ":" << feet[i].y << ":" << feet[i].z << endl;
         }
         //cout << endl;
         */
-
+//        /*
         for (int i = 0; i < legsCount; i++) {
             body->legs[i].solveInverse(robot.getOrientation(), &feet[i], &joints[i], nullptr);
         }
+//        */
 
         server.publish(server.Control::joints, server.Control::joints, [&](DataView& out){
             for (int i = 0; i < legsCount; i++) {
