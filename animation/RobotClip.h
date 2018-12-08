@@ -10,9 +10,8 @@
 
 class RobotClip : public AnimationClip {
 public:
-    RobotClip(float length,
-            Mat4Channel bodyChannel, size_t footCount, Bezier3Channel* footChannels) :
-            AnimationClip(length),
+    RobotClip(Mat4Channel bodyChannel, size_t footCount, Bezier3Channel* footChannels) :
+            AnimationClip(),
             bodyChannel(bodyChannel),
             footCount(footCount),
             footChannels(footChannels) {}

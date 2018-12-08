@@ -33,17 +33,6 @@ public:
     RobotClip& getAnimation(const char* name) {
         Value& docClip = doc[name];
 
-        // clip length
-        float length = docClip["length"].GetFloat();
-
-        // clip loop style / iterations
-        Value& docLoop = docClip["loop"];
-        if (docLoop.IsString()) {
-            string loop = docLoop.GetString();
-        } else if (docLoop.IsInt()) {
-            int loop = docLoop.GetInt();
-        }
-
         // body channel
         Mat4Channel& bodyChannel = getBodyChannel(docClip["body"]);
 
@@ -54,7 +43,28 @@ public:
             footChannels[i] = getFootChannel(docFeet[i]);
         }
 
-        return *new RobotClip(length, bodyChannel, docFeet.Size(), footChannels);
+        RobotClip& clip = *new RobotClip(bodyChannel, docFeet.Size(), footChannels);
+
+        // clip length
+        clip.length = docClip["length"].GetFloat();
+
+        // loop mode
+        string mode = docClip["mode"].GetString();
+        if (mode == "none") {
+            clip.mode = AnimationClip::Mode::none;
+        } else if (mode == "clamp") {
+            clip.mode = AnimationClip::Mode::none;
+        } else if (mode == "loop") {
+            clip.mode = AnimationClip::Mode::loop;
+        } else if (mode == "pong") {
+            clip.mode = AnimationClip::Mode::pong;
+        }
+
+        // clip iterations
+        Value& docTimes = docClip["times"];
+        clip.iterations = docTimes.GetInt();
+
+        return clip;
     }
 
     Mat4Channel& getBodyChannel(Value& docBody) {
@@ -91,7 +101,7 @@ public:
         } else if (ease == "inout") {
             func = easeQuadraticInOut;
         }
-        
+
         return *new Tween<void*>(nullptr, time, func);
     }
 
