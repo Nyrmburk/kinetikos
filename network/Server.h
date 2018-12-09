@@ -29,14 +29,13 @@ public:
 
     void send(WebSocket<SERVER>*& remote, DataView& data) {
         size_t bytesWritten = data.getIndex();
-        if (bytesWritten > 100) {
-            std::cout << bytesWritten << " bytes written" << std::endl;
-        }
         remote->send(data.getBuffer(), bytesWritten, OpCode::BINARY);
+        totalBytesWritten += bytesWritten;
     }
     
     void run() {
         h.onMessage([&](WebSocket<SERVER> *ws, char *message, size_t length, OpCode opCode) {
+            totalBytesRead += length;
             try {
                 handleMessage(ws, message, length);
             } catch (std::out_of_range e) {
@@ -84,8 +83,17 @@ public:
         }, 0, millis);
     }
 
+    unsigned long long getTotalBytesRead() {
+        return totalBytesRead;
+    }
+
+    unsigned long long getTotalBytesWritten() {
+        return totalBytesWritten;
+    }
 private:
     Hub h;
+    unsigned long long totalBytesRead = 0;
+    unsigned long long totalBytesWritten = 0;
 };
 
 #endif /* SERVER_H */

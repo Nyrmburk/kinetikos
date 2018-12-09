@@ -47,6 +47,19 @@ int main(int argc, char** argv) {
         server.publishOrientation();
     }, 20);
 
+    /*
+    unsigned long long lastBytesRead = 0;
+    unsigned long long lastBytesWritten = 0;
+    server.addTimer([&](int millis) {
+        cout << "read  " <<
+                (server.getTotalBytesRead() - lastBytesRead) / 1024 << " kBps" << endl;
+        cout << "wrote " <<
+                (server.getTotalBytesWritten() - lastBytesWritten) / 1024 << " kBps" << endl;
+        lastBytesRead = server.getTotalBytesRead();
+        lastBytesWritten = server.getTotalBytesWritten();
+    }, 1000);
+    */
+
     cout << "starting server" << endl;
     server.run();
     return 0;
