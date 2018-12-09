@@ -40,5 +40,11 @@ void Robot::simulationStep(float delta) {
 }
 
 void Robot::animationStep(float delta) {
+    if (this->currentAnimation) {
+        this->currentAnimation->step(delta);
+    }
 
+    for (int i = 0; i < body->legsCount; i++) {
+        body->legs[i].solveInverse(&orientation, &feet[i], &joints[i], nullptr);
+    }
 }

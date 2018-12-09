@@ -16,6 +16,7 @@
 
 #include "Body.h"
 #include "../mapping/World.h"
+#include "../animation/AnimationClip.h"
 #include "../control/Foot.h"
 #include "../control/Joints.h"
 #include "../control/MotorControl.h"
@@ -32,6 +33,10 @@ public:
     
     Body* getBody();
     World* getWorld();
+
+    void setAnimation(AnimationClip* clip) {
+        currentAnimation = clip;
+    }
 
     Mat4* getOrientation() {
         return &orientation;
@@ -54,6 +59,7 @@ public:
 private:
     Body* body;
     World* world;
+    AnimationClip* currentAnimation = nullptr;
     
     Mat4 orientation;
     Joints* joints;

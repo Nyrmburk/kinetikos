@@ -1,4 +1,4 @@
-#ifndef ANIMAITON_CLIP
+#ifndef ANIMATION_CLIP
 #define ANIMATION_CLIP
 
 class AnimationClip {

@@ -35,26 +35,7 @@ public:
         remote->send(data.getBuffer(), bytesWritten, OpCode::BINARY);
     }
     
-    void run(std::function<void(int)> step, int millis) {
-        Hub h;
-        std::string response = "Hello!";
-
-        // struct for the user data in the simulation step
-        struct timerData {
-            std::function<void(int)> step;
-            int millis;
-        } data;
-        data.step = step;
-        data.millis = millis;
-
-        // set up the timer loop for simulation steps
-        uS::Timer *timer = new uS::Timer(h.getLoop());
-        timer->setData(&data);
-        timer->start([](uS::Timer *timer) {
-            timerData* data = (timerData*) timer->getData();
-            data->step(data->millis);
-        }, 0, millis);
-
+    void run() {
         h.onMessage([&](WebSocket<SERVER> *ws, char *message, size_t length, OpCode opCode) {
             try {
                 handleMessage(ws, message, length);
@@ -72,6 +53,7 @@ public:
             onDisconnect(ws);
         });
 
+        std::string response = "Hello!";
         h.onHttpRequest([&](HttpResponse *res, HttpRequest req, char *data, size_t length,
                             size_t remainingBytes) {
             res->end(response.data(), response.length());
@@ -81,6 +63,29 @@ public:
             h.run();
         }
     }
+
+    void addTimer(std::function<void(int)> step, int millis) {
+        // struct for the user data in the time
+        struct TimerData {
+            std::function<void(int)> step;
+            int millis;
+        };
+
+        TimerData* data = new TimerData();
+        data->step = step;
+        data->millis = millis;
+
+        // set up the timer loop
+        uS::Timer *timer = new uS::Timer(h.getLoop());
+        timer->setData(data);
+        timer->start([](uS::Timer *timer) {
+            TimerData* data = (TimerData*) timer->getData();
+            data->step(data->millis);
+        }, 0, millis);
+    }
+
+private:
+    Hub h;
 };
 
 #endif /* SERVER_H */

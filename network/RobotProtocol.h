@@ -57,6 +57,28 @@ public:
             case Parameters::pigeon: return isThisAPigeon(remote, opcode, data);
         }
     }
+
+    void publishJoints() {
+        this->publish(Control::joints, Control::joints, [&](DataView& out){
+            for (uint8_t i = 0; i < robot.getBody()->legsCount; i++) {
+                out.writeSerial(&robot.getJoints()[i]);
+            }
+        });
+    }
+    
+    void publishFeet() {
+        this->publish(Control::feet, Control::feet, [&](DataView& out){
+            for (uint8_t i = 0; i < robot.getBody()->legsCount; i++) {
+                serializev3(&out, &robot.getFeet()[i]);
+            }
+        });
+    }
+
+    void publishOrientation() {
+        this->publish(Control::orientation, Control::orientation, [&](DataView& out){
+            serializem4(&out, robot.getOrientation());
+        });
+    }
 };
 
 #include "ControlProtocol.tpp"
