@@ -6,7 +6,11 @@
 #include "Foot.h"
 
 class FootPathControl {
-    void control(Robot* robot, const Vec3* target, Bezier3Channel* returnPath);
+public:
+    void control(Robot* robot,
+            float sourceTime, const Vec3* source,
+            float targetTime, const Vec3* target,
+            Bezier3Channel* returnPath);
 };
 
 #endif /* FOOTPATH_H */

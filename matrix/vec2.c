@@ -42,9 +42,8 @@ float lengthv2(Vec2 *vec) {
 void setv2(Vec2 *from, Vec2 *vec);
 int equalsv2(Vec2 *from, Vec2 *vec);
 
-Vec3 *v2asv3(Vec2 *from, float z, Vec3 *result) {
+void v2asv3(const Vec2 *from, float z, Vec3 *result) {
     result->x = from->x;
     result->y = from->y;
     result->z = z;
-    return result;
 }

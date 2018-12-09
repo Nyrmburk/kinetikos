@@ -18,13 +18,31 @@
 #include "../helper/Serializable.h"
 #include "../matrix/vec3.h"
 #include "../matrix/MatSerialize.h"
-#include "../control/Joints.h"
 
 #define BONES_PER_LEG 3
 
 const Vec3 COXA_AXIS = {0, 0, 1}; // z is up
 const Vec3 FEMUR_AXIS = {0, -1, 0}; // y is forward
 const Vec3 TIBIA_AXIS = FEMUR_AXIS;
+
+class Joints : public Serializable {
+public:
+    float coxa = 0;
+    float femur = 0;
+    float tibia = 0;
+
+    void serialize(DataView* writer) {
+        writer->writeFloat(coxa);
+        writer->writeFloat(femur);
+        writer->writeFloat(tibia);
+    }
+
+    void deserialize(DataView* reader) {
+        coxa = reader->readFloat();
+        femur = reader->readFloat();
+        tibia = reader->readFloat();
+    }
+};
 
 class Leg : public Serializable {
 public:
