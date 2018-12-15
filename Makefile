@@ -1,15 +1,30 @@
 EXECUTABLE ?= kinetikos
 
 BUILD_DIR ?= ./_build
-OUT := $(BUILD_DIR)/.make
  
 VENDOR ?= ./_vendor
 REMOTE_VENDOR ?= ./remote/html/_vendor
 INCLUDE := $(VENDOR)/include
 
+
 TOOLCHAIN_DIR ?= ../toolchain
+
+TARGET ?= local
+ifeq ($(TARGET),arm)
+$(eval ARMTC = $(shell pwd)/$(TOOLCHAIN_DIR)/arm/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64)
+	CC = $(ARMTC)/bin/arm-linux-gnueabihf-gcc
+	CXX = $(ARMTC)/bin/arm-linux-gnueabihf-g++
+	CPATH = $(ARMTC)/arm-linux-gnueabihf/libc/usr/include:$(ARMTC)/arm-linux-gnueabihf/libc/include/arm-linux-gnyeabihf
+endif
+
 TOOLCHAIN ?= $(shell $(CC) -dumpmachine)
 TOOLCHAIN ?= $(shell $(CXX) -dumpmachine)
+
+RELEASE ?= debug
+
+OUT := $(BUILD_DIR)/$(TOOLCHAIN)/$(RELEASE)
+
+RUNNER :=
 
 EXCLUDE := "control/PiPololuMotorControl.cpp"
 
@@ -28,8 +43,15 @@ LIBS ?= -L$(BIN) -lm -lz -lssl -lcrypto -luWS
 CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
 
-.PHONY: default
-default: target vendor $(OUT)/$(EXECUTABLE)
+ifeq ($(RELEASE),debug)
+	CFLAGS += -g -Og
+	CXXFLAGS += -g -Og
+else ifeq ($(RELEASE),release)
+	CFLAGS += -Ofast
+	CXXFLAGS += -Ofast
+endif
+
+default: vendor $(OUT)/$(EXECUTABLE)
 
 $(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
@@ -42,11 +64,6 @@ $(OUT)/%.cpp.o: %.cpp $(BIN)/libuWS.so
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBS) -c $< -o $@
 
-.PHONY: target
-target:
-	@mkdir -p $(BUILD_DIR)/$(TOOLCHAIN)
-	@ln -sfn $(TOOLCHAIN) $(OUT)
-
 %/libuWS.so:
 	$(MAKE) -B -C $(VENDOR)/uWebSockets \
 		CC=$(CC) \
@@ -58,14 +75,17 @@ target:
 
 -include $(DEPS)
 
-.PHONY: strict
-strict: CFLAGS += -Werror -Wall
-strict: CXXFLAGS += -Werror -Wall
-strict: default
-
 .PHONY: run
 run: default
-	@export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(shell pwd)/$(BIN) && $(OUT)/$(EXECUTABLE)
+	@export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(shell pwd)/$(BIN) && $(RUNNER) $(OUT)/$(EXECUTABLE)
+
+.PHONY: debug
+debug: RUNNER = gdb
+debug: run
+
+.PHONY: memcheck
+memcheck: RUNNER = valgrind
+memcheck: run
 
 .PHONY: clean
 clean:
@@ -126,19 +146,4 @@ $(REMOTE_VENDOR)/dat.gui:
 
 $(REMOTE_VENDOR)/stats.js:
 	git clone --depth=1 https://github.com/mrdoob/stats.js.git $@
-
-
-# platform targets
-.PHONY: arm
-arm:
-	$(eval ARMTC = $(shell pwd)/$(TOOLCHAIN_DIR)/arm/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64)
-	$(eval CC = $(ARMTC)/bin/arm-linux-gnueabihf-gcc)
-	$(eval CXX = $(ARMTC)/bin/arm-linux-gnueabihf-g++)
-	$(eval CPATH = $(ARMTC)/arm-linux-gnueabihf/libc/usr/include:$(ARMTC)/arm-linux-gnueabihf/libc/include/arm-linux-gnyeabihf)
-
-.PHONY: rpi
-rpi: arm
-rpi: target
-rpi: $(OUT)/./control/PiPololuMotorControl.cpp.o
-rpi: $(OUT)/$(EXECUTABLE)
 
