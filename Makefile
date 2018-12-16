@@ -26,6 +26,8 @@ OUT := $(BUILD_DIR)/$(TOOLCHAIN)/$(RELEASE)
 
 RUNNER :=
 
+ARGS :=
+
 EXCLUDE := "control/PiPololuMotorControl.cpp"
 
 SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(addprefix -e ,$(EXCLUDE)) | grep -v $(VENDOR) | grep -v $(TOOLCHAIN))
@@ -44,8 +46,8 @@ CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
 
 ifeq ($(RELEASE),debug)
-	CFLAGS += -g -Og
-	CXXFLAGS += -g -Og
+	CFLAGS += -g
+	CXXFLAGS += -g
 else ifeq ($(RELEASE),release)
 	CFLAGS += -Ofast
 	CXXFLAGS += -Ofast
@@ -56,11 +58,11 @@ default: vendor $(OUT)/$(EXECUTABLE)
 $(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
 
-$(OUT)/%.c.o: %.c $(BIN)/libuWS.so
+$(OUT)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LIBS) -c $< -o $@
 
-$(OUT)/%.cpp.o: %.cpp $(BIN)/libuWS.so
+$(OUT)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBS) -c $< -o $@
 
@@ -77,7 +79,7 @@ $(OUT)/%.cpp.o: %.cpp $(BIN)/libuWS.so
 
 .PHONY: run
 run: default
-	@export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(shell pwd)/$(BIN) && $(RUNNER) $(OUT)/$(EXECUTABLE)
+	@export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(shell pwd)/$(BIN) && $(RUNNER) $(OUT)/$(EXECUTABLE) $(ARGS)
 
 .PHONY: debug
 debug: RUNNER = gdb
