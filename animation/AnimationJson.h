@@ -30,14 +30,12 @@ public:
         doc.Parse(json);
     }
 
-    RobotClip& getAnimation(const char* name) {
-        Value& docClip = doc[name];
-
+    RobotClip& getAnimation() {
         // body channel
-        Mat4Channel& bodyChannel = getBodyChannel(docClip["body"]);
+        Mat4Channel& bodyChannel = getBodyChannel(doc["body"]);
 
         // feet channels
-        Value& docFeet = docClip["feet"];
+        Value& docFeet = doc["feet"];
         Bezier3Channel* footChannels = new Bezier3Channel[docFeet.Size()];
         for (SizeType i = 0; i < docFeet.Size(); i++) {
             footChannels[i] = getFootChannel(docFeet[i]);
@@ -46,14 +44,14 @@ public:
         RobotClip& clip = *new RobotClip(bodyChannel, docFeet.Size(), footChannels);
 
         // clip length
-        clip.length = docClip["length"].GetFloat();
+        clip.length = doc["length"].GetFloat();
 
         // loop mode
-        string mode = docClip["mode"].GetString();
+        string mode = doc["mode"].GetString();
         if (mode == "none") {
             clip.mode = AnimationClip::Mode::none;
         } else if (mode == "clamp") {
-            clip.mode = AnimationClip::Mode::none;
+            clip.mode = AnimationClip::Mode::clamp;
         } else if (mode == "loop") {
             clip.mode = AnimationClip::Mode::loop;
         } else if (mode == "pong") {
@@ -61,7 +59,7 @@ public:
         }
 
         // clip iterations
-        Value& docTimes = docClip["times"];
+        Value& docTimes = doc["times"];
         clip.iterations = docTimes.GetInt();
 
         return clip;

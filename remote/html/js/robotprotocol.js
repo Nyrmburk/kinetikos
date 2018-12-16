@@ -3,13 +3,14 @@ var parameters = {
 }
 
 var control = {
-	joints:      200,
-	feet:        201,
-	footPaths:   202,
-	orientation: 203,
-	velocity:    204,
-	navigation:  205,
-	destination: 206
+	bodyOrientation: 200,
+	joints:          201,
+	feet:            202,
+	footPaths:       203,
+	orientation:     204,
+	velocity:        205,
+	navigation:      206,
+	destination:     207
 }
 
 class RobotProtocol extends Protocol {
@@ -21,6 +22,7 @@ class RobotProtocol extends Protocol {
 
 	handle(opcode, data) {
 		switch (opcode) {
+			case control.bodyOrientation: return this.handleBodyOrientation(data);
 			case control.joints: return this.handleJoints(data);
 			case control.feet: return this.handleFeet(data);
 			case control.footPaths: return this.handleFootPaths(data);
@@ -35,6 +37,7 @@ class RobotProtocol extends Protocol {
 	onopen(evt) {
 		console.log("socket opened");
 		this.requestBody();
+		this.subscribe(this.Opcode.opSubscribe, control.bodyOrientation);
 		this.subscribe(this.Opcode.opSubscribe, control.joints);
 		this.subscribe(this.Opcode.opSubscribe, control.feet);
 		this.subscribe(this.Opcode.opSubscribe, control.orientation);
@@ -47,6 +50,12 @@ class RobotProtocol extends Protocol {
 	subscribe(opcode, roomId) {
 		var s = {serialize: function(data) {data.setUint16(roomId)}};
 		this.sendSerial(opcode, s);
+	}
+	
+	handleBodyOrientation(data) {
+		for (var i = 0; i < 16; i++) {
+			this.robot.bodyOrientation.elements[i] = data.getFloat32();
+		}
 	}
 
 	handleJoints(data) {

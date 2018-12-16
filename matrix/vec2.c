@@ -18,10 +18,18 @@
 #include <math.h>
 #include "vec2.h"
 
-void addv2(Vec2 *from, Vec2 *toAdd, Vec2 *result);
+void addv2(Vec2 *from, Vec2 *toAdd, Vec2 *result) {
+    result->x = from->x + toAdd->x;
+    result->y = from->y + toAdd->y;
+}
+
 void subtractv2(Vec2 *from, Vec2 *toSub, Vec2 *result);
 void multiplyv2v2(Vec2 *from, Vec2 *toMult, Vec2 *result);
-void multiplyv2s(Vec2 *from, float scalar, Vec2 *result);
+void multiplyv2s(Vec2 *from, float scalar, Vec2 *result) {
+    result->x = from->x * scalar;
+    result->y = from->y * scalar;
+}
+
 void dividev2v2(Vec2 *from, Vec2 *toDiv, Vec2 *result);
 void dividev2s(Vec2 *from, float scalar, Vec2 *result);
 float dotv2(Vec2 *from, Vec2 *toDot);
@@ -39,7 +47,10 @@ float lengthv2(Vec2 *vec) {
     return sqrt(vec->x * vec->x + vec->y * vec->y);
 }
 
-void setv2(Vec2 *from, Vec2 *vec);
+void setv2(Vec2 *from, Vec2 *vec) {
+    from->x = vec->x;
+    from->y = vec->y;
+}
 int equalsv2(Vec2 *from, Vec2 *vec);
 
 void v2asv3(const Vec2 *from, float z, Vec3 *result) {

@@ -60,8 +60,12 @@ public:
         }
     }
 
-    void getGait(Value& docGait, void* gait) {
-        return;
+    void getGait(Gait* gait, const char* name) {
+        Value& docGait = doc["gaits"][name];
+        for (SizeType i = 0; i < docGait.Size(); i++) {
+            gait[i].strike = docGait[i][0].GetFloat();
+            gait[i].duration = docGait[i][1].GetFloat();
+        }
     }
 
 private:

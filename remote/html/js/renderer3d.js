@@ -9,7 +9,7 @@ class Renderer3d {
 
 		this.container = container;
 		this.robot = robot;
-		this.bodyDisplay;
+		this.robotDisplay;
 
 		var controls, gui;
 
@@ -97,12 +97,8 @@ class Renderer3d {
 
 	setRobot(robot) {
 		this.robot = robot;
-		this.bodyDisplay = this.getBodyDisplay(robot.body);
-		this.scene.add(this.bodyDisplay);
-
-		for (var i = 0; i < robot.feet.length; i++) {
-			this.scene.add(this.getFootDisplay(robot.feet[i], i, 0x7f007f));
-		}
+		this.robotDisplay = this.getRobotDisplay(robot);
+		this.scene.add(this.robotDisplay);
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,22 +235,24 @@ class Renderer3d {
 	getFootPathDisplay(path) {
 	}
 
-	getrobotDisplay() {
+	getRobotDisplay(robot) {
 
 		// this doesn't work because when the robot moves, then so does literally everything else.
 		// that's not right.
 		// I need a worldDisplay
-		var robotGroup = new THREE.Group();
-		robotGroup.add(getPositionDisplay());
-		robotGroup.add(getDestinationDisplay());
-		robotGroup.add(getVelocityDisplay());
+		var robotDisplay = new THREE.Group();
+		robotDisplay.matrixAutoUpdate = false;
+		//robotDisplay.add(getPositionDisplay());
+		//robotDisplay.add(getDestinationDisplay());
+		//robotDisplay.add(getVelocityDisplay());
 
-		robotGroup.add(getBodyDisplay());
+		robotDisplay.add(this.getBodyDisplay(robot.body));
 
-		this.robot.body.legs.forEach(function(leg, index) {
-		});
+		for (var i = 0; i < robot.body.legs.length; i++)  {
+			robotDisplay.add(this.getFootDisplay(robot.feet[i], i, 0x7f007f));
+		}
 
-		return bodyGroup;
+		return robotDisplay;
 	}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -299,21 +297,25 @@ class Renderer3d {
 			tibia.matrix.multiply(matrix);
 		}
 
-		if (bodyGroup) {
-			bodyGroup.matrix.copy(robot.orientation);
-		}
+		bodyGroup.matrix.copy(robot.bodyOrientation);
 	}
 
-	animateRobot(scene, robot) {
+	animateRobot(robot, robotDisplay) {
+		var bodyGroup = robotDisplay.getObjectByName("body");
+		this.animateBody(robot, bodyGroup);
+
 		for (var i = 0; i < robot.feet.length; i++) {
-			var foot = scene.getObjectByName("foot" + i);
+			var foot = robotDisplay.getObjectByName("foot" + i);
 			foot.position.copy(robot.feet[i]);
 		}
+
+		robotDisplay.matrix.copy(robot.orientation);
 	}
 
 	render() {
-		this.animateBody(this.robot, this.bodyDisplay);
-		this.animateRobot(this.scene, this.robot);
+		if (this.robotDisplay) {
+			this.animateRobot(this.robot, this.robotDisplay);
+		}
 		this.renderer.render(this.scene, this.camera);
 		this.stats.update();
 	}

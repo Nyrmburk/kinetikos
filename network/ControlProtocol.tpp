@@ -1,3 +1,6 @@
+template <typename T>
+void RobotProtocol<T>::controlBodyOrientation(T& remote, uint16_t opcode, DataView& data) {
+}
 
 template <typename T>
 void RobotProtocol<T>::controlJoints(T& remote, uint16_t opcode, DataView& data) {

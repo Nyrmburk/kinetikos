@@ -42,6 +42,10 @@ extern "C" {
 	//  r  r  r  z
 	//  ?  ?  ?  w?
 
+    const Vec3 X_AXIS = {1, 0, 0};
+    const Vec3 Y_AXIS = {0, 1, 0};
+    const Vec3 Z_AXIS = {0, 0, 1};
+
     void getPosition(const Mat4 *matrix, Vec3 *result);
     
     void setPosition(Mat4 *matrix, const Vec3 *position);

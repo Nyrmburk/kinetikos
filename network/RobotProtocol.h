@@ -13,6 +13,7 @@ public:
 
     // I need to turn my functions into functors. after all, that's how I'm using them
     // control
+    void controlBodyOrientation(T& remote, uint16_t opcode, DataView& data);
     void controlJoints(T& remote, uint16_t opcode, DataView& data);
     void controlFeet(T& remote, uint16_t opcode, DataView& data);
     void controlFootPaths(T& remote, uint16_t opcode, DataView& data);
@@ -30,7 +31,8 @@ public:
     // states
 
     enum Control {
-        joints = 200,
+        bodyOrientation = 200,
+        joints,
         feet,
         footPaths,
         orientation,
@@ -46,6 +48,7 @@ public:
 
     void handle(T& remote, uint16_t opcode, DataView& data) {
         switch (opcode) {
+            case Control::bodyOrientation: return controlBodyOrientation(remote, opcode, data);
             case Control::joints: return controlJoints(remote, opcode, data);
             case Control::feet: return controlFeet(remote, opcode, data);
             case Control::footPaths: return controlFootPaths(remote, opcode, data);
@@ -57,9 +60,16 @@ public:
             case Parameters::pigeon: return isThisAPigeon(remote, opcode, data);
         }
     }
+    
+    void publishBodyOrientation() {
+        this->publish(Control::bodyOrientation, Control::bodyOrientation, [&](DataView& out) {
+            serializem4(&out, robot.getBodyOrientation());
+        });
+    }
+
 
     void publishJoints() {
-        this->publish(Control::joints, Control::joints, [&](DataView& out){
+        this->publish(Control::joints, Control::joints, [&](DataView& out) {
             for (uint8_t i = 0; i < robot.getBody()->legsCount; i++) {
                 out.writeSerial(&robot.getJoints()[i]);
             }
@@ -67,7 +77,7 @@ public:
     }
     
     void publishFeet() {
-        this->publish(Control::feet, Control::feet, [&](DataView& out){
+        this->publish(Control::feet, Control::feet, [&](DataView& out) {
             for (uint8_t i = 0; i < robot.getBody()->legsCount; i++) {
                 serializev3(&out, &robot.getFeet()[i]);
             }

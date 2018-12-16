@@ -1,10 +1,11 @@
 class Robot {
 	constructor() {
-		this.orientation = new THREE.Matrix4();
 		this.body = new Body([]);
 
+		this.bodyOrientation = new THREE.Matrix4();
 		this.joints = [];
 		this.feet = [];
+		this.orientation = new THREE.Matrix4();
 	}
 }
 

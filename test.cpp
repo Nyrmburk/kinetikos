@@ -74,8 +74,8 @@ int test() {
     cout << endl;
 
     // test animations
-    AnimationJson animations("config/animations.json");
-    RobotClip clip = animations.getAnimation("actual");
+    AnimationJson animation("config/animations/demo.json");
+    RobotClip clip = animation.getAnimation();
 
     cout << "testing stepping" << endl;
     Mat4 cool;
@@ -110,7 +110,7 @@ int test() {
     cout << endl;
 
     // test setting home animation
-    RobotClip home = animations.getAnimation("home");
+    RobotClip home = animation.getAnimation();
     home.setTargets(robot.getOrientation(), feet);
     home.step(0);
 
@@ -118,9 +118,10 @@ int test() {
     cout << "testing server" << endl;
     Server server(robot);
     float j = 0;
-    server.addTimer([&](int millis) {
-        float delta = ((float) millis / 1000);
-        robot.simulationStep(delta);
+    server.addTimer([&](long millis, int delta) {
+        float now = ((float) millis) / 1000;
+        float fDelta = ((float) delta) / 1000;
+        robot.simulationStep(now, fDelta);
 
         home.step(delta);
 
