@@ -29,7 +29,9 @@ window.onload = function() {
 	//streamPlayer.connect(videoSocket);
 	//streamPlayer.connect(getUri(3000));
 
-	this.client = new Client(new WebSocket(getUri(8080)), robot);
+	var socket = new ReconnectingWebSocket(getUri(8080), null, {automaticOpen: false});
+	this.client = new Client(socket, robot);
+	socket.open();
 
 	render();
 }

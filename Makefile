@@ -109,6 +109,7 @@ vendor: \
 	$(REMOTE_VENDOR)/h264-live-player \
 	$(REMOTE_VENDOR)/dat.gui \
 	$(REMOTE_VENDOR)/stats.js \
+	$(REMOTE_VENDOR)/reconnecting-websocket \
 
 $(VENDOR)/uWebSockets:
 	git clone https://github.com/uNetworking/uWebSockets.git $@
@@ -148,4 +149,7 @@ $(REMOTE_VENDOR)/dat.gui:
 
 $(REMOTE_VENDOR)/stats.js:
 	git clone --depth=1 https://github.com/mrdoob/stats.js.git $@
+
+$(REMOTE_VENDOR)/reconnecting-websocket:
+	git clone --depth=1 https://github.com/joewalnes/reconnecting-websocket.git $@
 

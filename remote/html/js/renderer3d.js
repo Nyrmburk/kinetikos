@@ -97,6 +97,10 @@ class Renderer3d {
 
 	setRobot(robot) {
 		this.robot = robot;
+
+		if (this.robotDisplay) {
+			this.scene.remove(this.robotDisplay);
+		}
 		this.robotDisplay = this.getRobotDisplay(robot);
 		this.scene.add(this.robotDisplay);
 	}
