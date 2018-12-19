@@ -92,6 +92,9 @@ class Renderer3d {
 		var floor = new THREE.LineSegments(geometry, material);
 		floor.name = "floor";
 
+		floor.gridCount = gridCount;
+		floor.gridSpacing = gridSpacing;
+
 		return floor;
 	}
 
@@ -102,6 +105,7 @@ class Renderer3d {
 			this.scene.remove(this.robotDisplay);
 		}
 		this.robotDisplay = this.getRobotDisplay(robot);
+		this.robotDisplay.add(this.camera);
 		this.scene.add(this.robotDisplay);
 	}
 
@@ -319,6 +323,13 @@ class Renderer3d {
 	render() {
 		if (this.robotDisplay) {
 			this.animateRobot(this.robot, this.robotDisplay);
+			var floor = this.scene.getObjectByName("floor");
+			var position = new THREE.Vector3();
+			position.setFromMatrixPosition(this.robotDisplay.matrix);
+			position.x = position.x % floor.gridSpacing;
+			position.y = position.y % floor.gridSpacing;
+			this.robotDisplay.matrix.setPosition(position);
+
 		}
 		this.renderer.render(this.scene, this.camera);
 		this.stats.update();
