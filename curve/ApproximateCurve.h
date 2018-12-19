@@ -57,11 +57,11 @@ public:
                 t = (t - previous) / (next - previous);
 
                 // map t from [previous, next] to [0, 1](nonlinear)
-                t = i * step + t * step;
-                this->valueAt(t, value);
+                t = (i + t) * step;
                 break;
             }
         }
+        this->valueAt(t, value);
     }
 
     float length() {
