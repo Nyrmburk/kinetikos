@@ -99,7 +99,7 @@ private:
         float liftTime = 0;
 
         bool wasGrounded = false;
-        Mat4 accumulatedGroundedOrientation = {0};
+        Mat4 accumulatedGroundedOrientation = {};
         int groundedIterations = 0;
     };
     deque<StepFrame>* steps;
