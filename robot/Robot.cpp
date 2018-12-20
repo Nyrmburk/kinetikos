@@ -81,12 +81,8 @@ void Robot::simulationStep(float now, float delta) {
     // clearing invalid predictions
     float dirtyTime = simTime;
     for (uint8_t i = 0; i < legsCount; i++) {
-        if (!steps[i].empty() ) {
-            StepFrame* frame = &steps[i].back();
-            while (!steps[i].empty() && dirtyTime < frame->simTime) {
-                steps[i].pop_back();
-                frame = &steps[i].back();
-            }
+        while (!steps[i].empty() && dirtyTime < steps[i].back().simTime) {
+            steps[i].pop_back();
         }
         if (steps[i].empty()) {
             steps[i].push_back(*workingSteps[i]);
@@ -135,8 +131,7 @@ void Robot::simulationStep(float now, float delta) {
             bool tookStep = simGait(simTime + future, &orientationFuture, frame, gait[i], cursor);
             if (tookStep) {
                 //cout << "new step at: " << simTime + future << endl;
-                StepFrame newFrame;
-                steps[i].push_back(newFrame);
+                steps[i].emplace_back();
             }
         }
 
@@ -151,14 +146,14 @@ void Robot::simulationStep(float now, float delta) {
     Vec3 wsTargets[legsCount];
     Vec3 rsTargets[legsCount];
     for (uint8_t i = 0; i < legsCount; i++) {
-        StepFrame& step = steps[i].front();
-        while (!steps[i].empty() && step.simTime < simTime) {
+        while (!steps[i].empty() && steps[i].front().simTime < simTime) {
             steps[i].pop_front();
-            step = steps[i].front();
         }
+        StepFrame& step = steps[i].front();
         Mat4* ago = &step.accumulatedGroundedOrientation;
-        multm4s(ago, (1.0f / step.groundedIterations), ago);
-        cout << "x: " << ago->m[12] << ", y: " << ago->m[13] << endl;
+        Mat4 avgGroundedOrientation;
+        multm4s(ago, (1.0f / step.groundedIterations), &avgGroundedOrientation);
+        cout << "x: " << avgGroundedOrientation.m[12] << ", y: " << avgGroundedOrientation.m[13] << endl;
         cout << (int) i << ": land:" << step.landTime << ", lift:" << step.liftTime << endl;
 
         multm4v3(ago, &feetHome[i], 1, &wsTargets[i]);
