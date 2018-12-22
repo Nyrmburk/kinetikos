@@ -14,10 +14,7 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
-#include <deque>
-
 #include "Body.h"
-#include "Gait.h"
 #include "../mapping/World.h"
 #include "../mapping/MotionPlan.h"
 #include "../animation/AnimationClip.h"
@@ -42,8 +39,16 @@ public:
         currentAnimation = clip;
     }
 
+    MotionPlan* getMotionPlan() {
+        return plan;
+    }
+
     void setMotionPlan(MotionPlan* plan) {
         this->plan = plan;
+    }
+
+    Vec3* getFeetHome() {
+        return feetHome;
     }
 
     void setFeetHome(Vec3 feet[]) {
@@ -77,7 +82,6 @@ private:
     World* world;
     AnimationClip* currentAnimation = nullptr;
     MotionPlan* plan = nullptr;
-    Gait* gait;
 
     Mat4 bodyOrientation;
     Joints* joints;
@@ -89,23 +93,6 @@ private:
     MotorControl* motorControl;
     JointsControl* jointsControl;
     FootControl* footControl;
-
-    float gaitCursor = 0;
-    float simTime = 0;
-    
-    struct StepFrame {
-        float simTime = 0;
-        float landTime = 0;
-        float liftTime = 0;
-
-        bool wasGrounded = false;
-        Mat4 accumulatedGroundedOrientation = {};
-        int groundedIterations = 0;
-    };
-    deque<StepFrame>* steps;
-    StepFrame** workingSteps;
-
-    bool simGait(float time, Mat4* orientation, StepFrame& frame, Gait& gait, float cursor);
 };
 
 #endif /* ROBOT_H */

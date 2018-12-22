@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "robot/Gait.h"
+
 using namespace std;
 using namespace rapidjson;
 

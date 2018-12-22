@@ -10,10 +10,12 @@
 #include <unistd.h>
 
 #include "robot/Robot.h"
+#include "robot/Config.h"
 #include "network/Server.h"
 #include "network/RobotProtocol.h"
 #include "animation/AnimationJson.h"
 #include "animation/RobotClip.h"
+#include "animation/WalkingRobotClip.h"
 #include "../mapping/VelocityPlan.h"
 #include "../matrix/vec2.h"
 
@@ -31,6 +33,9 @@ int main(int argc, char** argv) {
     Vec3 feetHome[robot.getBody()->legsCount];
     home.setTargets(&orientation, feetHome);
     home.step(0);
+    home.setTargets(robot.getBodyOrientation(), robot.getFeet());
+    home.step(0);
+    home.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setFeetHome(feetHome);
     robot.setAnimation(&home);
     
@@ -39,7 +44,14 @@ int main(int argc, char** argv) {
     demo.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setAnimation(&demo);
 
-    Vec2 velocity = {0, 10};
+    Config cfg("config/robot.json");
+    Gait gait[robot.getBody()->legsCount];
+    cfg.getGait(gait, "alternating tripod");
+    WalkingRobotClip walk(&robot, gait);
+    walk.setTargets(robot.getBodyOrientation(), robot.getFeet());
+    robot.setAnimation(&walk);
+
+    Vec2 velocity = {0, 100};
     VelocityPlan plan;
     plan.set(velocity, 0);
     robot.setMotionPlan(&plan);
@@ -51,6 +63,7 @@ int main(int argc, char** argv) {
         float now = ((float) millis) / 1000;
         float fDelta = ((float) delta) / 1000;
         robot.simulationStep(now, fDelta);
+        walk.sim(now, fDelta);
     }, 60);
 
     server.addTimer([&](long millis, int delta) {

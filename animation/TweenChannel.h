@@ -57,11 +57,15 @@ using namespace std;
 template <typename I, typename O>
 class TweenChannel {
 public:
-    void getTweens(float time, Tween<I>* returnStart, Tween<I>* returnEnd) const {
+    bool getTweens(float time, Tween<I>* returnStart, Tween<I>* returnEnd) const {
+        if (tweens.size() == 0) {
+            return false;
+        }
+
         for (size_t i = 0; i < tweens.size(); i++) {
             if (time < tweens[i].getTime()) {
                 *returnEnd = tweens[i];
-                return;
+                return true;
             } else {
                 *returnStart = tweens[i];
             }
@@ -69,6 +73,7 @@ public:
 
         // there's only one element left in the list
         *returnEnd = *returnStart;
+        return true;
     }
     
     void insertTween(const Tween<I>& t) {
@@ -83,17 +88,22 @@ public:
     void removeTween(const Tween<I>& t) {
         tweens.erase(t);
     }
+
+    void clear() {
+        tweens.clear();
+    }
     
     void act(float time, O& result) const {
         Tween<I> start, end;
-        getTweens(time, &start, &end);
-        float range = end.getTime() - start.getTime();
-        float t = 0;
-        if (range != 0.0f) {
-            t = (time - start.getTime()) / range;
+        if (getTweens(time, &start, &end)) {
+            float range = end.getTime() - start.getTime();
+            float t = 0;
+            if (range != 0.0f) {
+                t = (time - start.getTime()) / range;
+            }
+            float k = start.ease(t);
+            ease(start.getValue(), end.getValue(), k, &result);
         }
-        float k = start.ease(t);
-        ease(start.getValue(), end.getValue(), k, &result);
     }
     
     virtual void ease(I* start, I* end, float k, O* result) const = 0;
