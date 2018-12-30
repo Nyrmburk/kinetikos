@@ -32,7 +32,9 @@ public:
         workingSteps = new StepFrame*[footCount];
         for (uint8_t i = 0; i < footCount; i++) {
             workingSteps[i] = new StepFrame;
-        }   
+        }
+
+        this->lastSteps = new Step[footCount];
     }
 
     virtual ~WalkingRobotClip() {
@@ -45,7 +47,8 @@ public:
         this->feet = feet;
     }
 
-    void sim(float time, float delta) {
+    void sim(float delta) {
+        float time = getTime();
         // calculate per-foot speed
 
         // feet from past sim and future sim to calculate gait interval from greatest foot speed
@@ -66,17 +69,22 @@ public:
         inversem4(&orientationNow, &invOrientationNow);
 
         // get foot position at time now
-        cout << "updating the foot home position" << endl;
         for (uint8_t i = 0; i < footCount; i++) {
             multm4v3(&orientationNow, &robot->getFeetHome()[i], 1, &wsFeetFuture[i]);
         }
 
         // clearing invalid predictions
-        float dirtyTime = simTime;
+        float dirtyTime = time - delta;
         for (uint8_t i = 0; i < footCount; i++) {
-            while (!steps[i].empty() && dirtyTime < steps[i].back().simTime) {
-                steps[i].pop_back();
+            auto it = steps[i].begin();
+            while (it != steps[i].end()) {
+                if (dirtyTime <= (*it).simTime) {
+                    break;
+                }
+                it++;
             }
+            steps[i].erase(it, steps[i].end());
+
             if (steps[i].empty()) {
                 steps[i].push_front(*workingSteps[i]);
             }
@@ -123,7 +131,7 @@ public:
             //cout << "current cursor: " << cursor << endl;
             for (uint8_t i = 0; i < footCount; i++) {
                 StepFrame& frame = steps[i].back();
-                bool tookStep = simGait(simTime + future, &orientationFuture, frame, gait[i], cursor);
+                bool tookStep = simGait(time + future, &orientationFuture, frame, gait[i], cursor);
                 if (tookStep) {
                     //cout << "new step at: " << simTime + future << endl;
                     // the step is complete, create a new working step
@@ -135,42 +143,34 @@ public:
         } while (cursor < gaitCursor + 1);
         // after looping
 
-        gaitCursor += delta; // delta * interval
-        cout << "new cursor: " << gaitCursor << endl;
-
         // calculate leg targets
-        robot->getMotionPlan()->orientationAt(delta, &orientationFuture);
-        inversem4(&orientationFuture, &invOrientationFuture);
         Vec3 wsTargets[footCount];
         Vec3 rsTargets[footCount];
         for (uint8_t i = 0; i < footCount; i++) {
-            while (!steps[i].empty() && steps[i].front().simTime < simTime) {
+            while (!steps[i].empty() && steps[i].front().simTime < time) {
                 steps[i].pop_front(); // clear old steps
             }
             StepFrame& step = steps[i].front();
-            Mat4* ago = &step.accumulatedGroundedOrientation;
-            cout << "ago: it: " << step.groundedIterations << ", x: " << ago->m[12] << ", y: " << ago->m[13] << endl;
-            Mat4 avgGroundedOrientation;
-            multm4s(ago, (1.0f / step.groundedIterations), &avgGroundedOrientation);
-            cout << "x: " << avgGroundedOrientation.m[12] << ", y: " << avgGroundedOrientation.m[13] << endl;
-            cout << (int) i << ": land:" << step.landTime << ", lift:" << step.liftTime << endl;
-            cout << (int) steps[i].size() << " steps planned ahead" << endl;
 
-            multm4v3(&avgGroundedOrientation, &robot->getFeetHome()[i], 1, &wsTargets[i]);
+            getAvgPosition(step, &robot->getFeetHome()[i], &wsTargets[i]);
+
+            robot->getMotionPlan()->orientationAt(step.landTime - time, &orientationFuture);
+            inversem4(&orientationFuture, &invOrientationFuture);
+            // TODO: invOrientationFuture future time needs to be time of footstep landing
             multm4v3(&invOrientationFuture, &wsTargets[i], 1, &rsTargets[i]);
-            cout << "target: " << rsTargets[i].x << ", " << rsTargets[i].y << endl;
         }
 
         // find new rs grounded foot position
+        robot->getMotionPlan()->orientationAt(delta, &orientationFuture);
+        inversem4(&orientationFuture, &invOrientationFuture);
         Vec3 wsFeetNow[footCount];
         Vec3 rsFeetFuture[footCount];
         for (uint8_t i = 0; i < footCount; i++) {
             multm4v3(&orientationNow, &robot->getFeet()[i], 1, &wsFeetNow[i]);
             multm4v3(&invOrientationFuture, &wsFeetNow[i], 1, &rsFeetFuture[i]);
-            cout << "rs grounded: x: " << rsFeetFuture[i].x << ", y: " << rsFeetFuture[i].y << endl;
         }
 
-        float simTimeFuture = simTime + delta;
+        float simTimeFuture = time + delta;
         // update tweens
         for (uint8_t i = 0; i < footCount; i++) {
             footChannels[i].clear();
@@ -181,7 +181,8 @@ public:
                 Bezier3::Node startNode;
                 setv3(&startNode.point, &robot->getFeet()[i]);
                 setv3(&startNode.handle, &handle);
-                Tween<Bezier3::Node> start(startNode, simTime, easeLinear);
+
+                Tween<Bezier3::Node> start(startNode, time, easeLinear);
                 footChannels[i].insertTween(start);
                 cout << "start: " << startNode.point.x << ", " << startNode.point.y << endl;
                 
@@ -195,40 +196,34 @@ public:
                 Vec3 handle = {0, 0, 20};
                 cout << "foot " << (int) i << " lifted" << endl;
 
-/*
                 Bezier3::Node startNode;
-                setv3(&startNode.point, &robot->getFeetHome()[i]);
+                Vec3 rsPositionNow;
+                multm4v3(&invOrientationNow, &lastSteps[i].position, 1, &rsPositionNow);
+                setv3(&startNode.point, &rsPositionNow);
                 setv3(&startNode.handle, &handle);
-                Tween<Bezier3::Node> start(startNode, simTime, easeLinear);
+                Tween<Bezier3::Node> start(startNode, lastSteps[i].liftTime, easeQuadraticInOut);
                 footChannels[i].insertTween(start);
                 cout << "start: " << startNode.point.x << ", " << startNode.point.y << endl;
-                */
 
                 Bezier3::Node endNode;
                 setv3(&endNode.point, &rsTargets[i]);
                 setv3(&endNode.handle, &handle);
-                Tween<Bezier3::Node> end(endNode, simTime, easeNone);
-                footChannels[i].insertTween(end);
-                Tween<Bezier3::Node> end2(endNode, simTimeFuture, easeNone);
+                Tween<Bezier3::Node> end2(endNode, steps[i].front().landTime, easeNone);
                 footChannels[i].insertTween(end2);
                 cout << "end: " << endNode.point.x << ", " << endNode.point.y << endl;
-
-                // ??? = what?
-                // original land position?
-                // current position?
-                // it's really difficult to make the new tween match if I change it
-                //start = (landTime[i], ???);
-                //end = (liftTime[i], rsTargets[i])
-    //            cout << "start: " << landTime[i] << ", " << "???" << endl;
-    //            cout << "end:   " << liftTime[i] << ", (" <<
-    //                    rsTargets[i].x << ", " << rsTargets[i].y << ", " << rsTargets[i].z << endl;
             }
         }
 
-        simTime = simTimeFuture;
+        gaitCursor += delta; // delta * interval
+        cout << "new cursor: " << gaitCursor << endl;
+
         for (uint8_t i = 0; i < footCount; i++) {
             // figure out orientation and shit
             if (simGait(simTimeFuture, &orientationFuture, *workingSteps[i], gait[i], gaitCursor)) {
+                lastSteps[i].landTime = workingSteps[i]->landTime;
+                lastSteps[i].liftTime = workingSteps[i]->liftTime;
+                getAvgPosition(*workingSteps[i], &robot->getFeetHome()[i], &lastSteps[i].position);
+
                 delete workingSteps[i];
                 workingSteps[i] = new StepFrame;
             }
@@ -256,7 +251,6 @@ private:
 
     Gait* gait;
     float gaitCursor = 0;
-    float simTime = 0;
     
     struct StepFrame {
         float simTime = 0;
@@ -269,6 +263,13 @@ private:
     };  
     deque<StepFrame>* steps;
     StepFrame** workingSteps;
+
+    struct Step {
+        float landTime = 0;
+        float liftTime = 0;
+        Vec3 position = {};
+    };
+    Step* lastSteps;
 
     bool simGait(float time, Mat4* orientation, StepFrame& frame, Gait& gait, float cursor) {
         bool tookStep = false;
@@ -293,6 +294,13 @@ private:
         frame.simTime = time;
 
         return tookStep;
+    }
+
+    void getAvgPosition(StepFrame& step, Vec3* home, Vec3* target) {
+        Mat4* ago = &step.accumulatedGroundedOrientation;
+        Mat4 avgGroundedOrientation;
+        multm4s(ago, (1.0f / step.groundedIterations), &avgGroundedOrientation);
+        multm4v3(&avgGroundedOrientation, home, 1, target);
     }
 };
 

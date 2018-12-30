@@ -36,10 +36,10 @@ World* Robot::getWorld() {
     return world;
 }
 
-void Robot::simulationStep(float now, float delta) {
+void Robot::simulationStep(float delta) {
 }
 
-void Robot::animationStep(float now, float delta) {
+void Robot::animationStep(float delta) {
     if (this->currentAnimation) {
         this->currentAnimation->step(delta);
     }
@@ -50,5 +50,4 @@ void Robot::animationStep(float now, float delta) {
 
     plan->step(delta);
     plan->orientationAt(0, &orientation);
-    //cout << orientation.m[12] << ", " << orientation.m[13] << endl;
 }

@@ -59,20 +59,18 @@ int main(int argc, char** argv) {
     cout << "initializing server" << endl;
     Server server(robot);
 
-    server.addTimer([&](long millis, int delta) {
-        float now = ((float) millis) / 1000;
+    server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
-        robot.simulationStep(now, fDelta);
-        walk.sim(now, fDelta);
-    }, 60);
+        robot.simulationStep(fDelta);
+        walk.sim(fDelta);
+    }, 100);
 
-    server.addTimer([&](long millis, int delta) {
-        float now = ((float) millis) / 1000;
+    server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
-        robot.animationStep(now, fDelta);
-    }, 20);
+        robot.animationStep(fDelta);
+    }, 10);
 
-    server.addTimer([&](long millis, int delta) {
+    server.addTimer([&](int delta) {
         server.publishBodyOrientation();
         server.publishJoints();
         server.publishFeet();

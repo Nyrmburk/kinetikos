@@ -118,10 +118,9 @@ int test() {
     cout << "testing server" << endl;
     Server server(robot);
     float j = 0;
-    server.addTimer([&](long millis, int delta) {
-        float now = ((float) millis) / 1000;
+    server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
-        robot.simulationStep(now, fDelta);
+        robot.simulationStep(fDelta);
 
         home.step(delta);
 

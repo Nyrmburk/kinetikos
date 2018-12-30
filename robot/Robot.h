@@ -75,8 +75,8 @@ public:
         return footPaths;
     }
     
-    void simulationStep(float now, float delta);
-    void animationStep(float now, float delta);
+    void simulationStep(float delta);
+    void animationStep(float delta);
 private:
     Body* body;
     World* world;

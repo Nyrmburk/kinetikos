@@ -62,6 +62,10 @@ public:
             return false;
         }
 
+        if (time < tweens[0].getTime()) {
+            return false;
+        }
+
         for (size_t i = 0; i < tweens.size(); i++) {
             if (time < tweens[i].getTime()) {
                 *returnEnd = tweens[i];

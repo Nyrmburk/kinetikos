@@ -59,6 +59,10 @@ public:
         act(time);
     }
 
+    float getTime() {
+        return time;
+    }
+
     float length = 0;
     float speed = 1;
     int iterations = 1;

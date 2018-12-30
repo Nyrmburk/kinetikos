@@ -16,7 +16,6 @@
 
 #include <iostream>
 #include <functional>
-#include <chrono>
 
 #include <uWS/uWS.h>
 
@@ -64,10 +63,10 @@ public:
         }
     }
 
-    void addTimer(std::function<void(long, int)> step, int millis) {
+    void addTimer(std::function<void(int)> step, int millis) {
         // struct for the user data in the time
         struct TimerData {
-            std::function<void(long, int)> step;
+            std::function<void(int)> step;
             int millis;
         };
 
@@ -80,10 +79,7 @@ public:
         timer->setData(data);
         timer->start([](uS::Timer *timer) {
             TimerData* data = (TimerData*) timer->getData();
-            auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(timer->loop->timepoint);
-            auto epoch = now_ms.time_since_epoch();
-            long now = epoch.count();
-            data->step(now, data->millis);
+            data->step(data->millis);
         }, 0, millis);
     }
 
