@@ -35,6 +35,11 @@ public:
         }
 
         this->lastSteps = new Step[footCount];
+        for (uint8_t i = 0; i < footCount; i++) {
+            lastSteps[i].landTime = getTime();
+            lastSteps[i].liftTime = getTime();
+            lastSteps[i].position = robot->getFeet()[i];
+        }
     }
 
     virtual ~WalkingRobotClip() {
