@@ -197,9 +197,7 @@ public:
                 cout << "foot " << (int) i << " lifted" << endl;
 
                 Bezier3::Node startNode;
-                Vec3 rsPositionNow;
-                multm4v3(&invOrientationNow, &lastSteps[i].position, 1, &rsPositionNow);
-                setv3(&startNode.point, &rsPositionNow);
+                setv3(&startNode.point, &lastSteps[i].position);
                 setv3(&startNode.handle, &handle);
                 Tween<Bezier3::Node> start(startNode, lastSteps[i].liftTime, easeQuadraticInOut);
                 footChannels[i].insertTween(start);
@@ -222,7 +220,9 @@ public:
             if (simGait(simTimeFuture, &orientationFuture, *workingSteps[i], gait[i], gaitCursor)) {
                 lastSteps[i].landTime = workingSteps[i]->landTime;
                 lastSteps[i].liftTime = workingSteps[i]->liftTime;
-                getAvgPosition(*workingSteps[i], &robot->getFeetHome()[i], &lastSteps[i].position);
+                Vec3 position;
+                getAvgPosition(*workingSteps[i], &robot->getFeetHome()[i], &position);
+                multm4v3(&invOrientationFuture, &position, 1, &lastSteps[i].position);
 
                 delete workingSteps[i];
                 workingSteps[i] = new StepFrame;
