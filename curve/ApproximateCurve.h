@@ -12,7 +12,7 @@ public:
     }
 
     ~ApproximateCurve() {
-        delete lengthLookup;
+        delete[] lengthLookup;
     }
 
     void approximate() {

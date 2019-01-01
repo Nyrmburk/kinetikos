@@ -29,4 +29,9 @@ class Protocol {
 
 		this.send(data);
 	}
+
+	subscribe(opcode, roomId) {
+		var s = {serialize: function(data) {data.setUint16(roomId)}};
+		this.sendSerial(opcode, s);
+	}
 }

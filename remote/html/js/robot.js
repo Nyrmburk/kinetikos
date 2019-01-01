@@ -77,3 +77,36 @@ class Bone {
 		this.range = data.getFloat32();
 	}
 }
+
+class Workspace {
+	constructor(precision = 10) {
+		this.precision = precision;
+		this.points = [];
+	}
+
+	elementsPerSlice() {
+		// 4 sices of workspace slice
+		return this.precision * 4;
+	}
+
+	slices() {
+		// n+1 vertical slices
+		return this.precision + 1;
+	}
+
+	totalElements() {
+		return this.elementsPerSlice() * this.slices();
+	}
+
+	deserialize(data) {
+		this.precision = data.getInt32();
+		var elements = this.totalElements();
+		for (var i = 0; i < elements; i++) {
+			var point = new THREE.Vector3();
+			point.x = data.getFloat32();
+			point.y = data.getFloat32();
+			point.z = data.getFloat32();
+			this.points.push(point);
+		}
+	}
+}

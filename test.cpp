@@ -114,6 +114,16 @@ int test() {
     home.setTargets(robot.getOrientation(), feet);
     home.step(0);
 
+    // test workspace
+    Workspace workspace(10);
+    size_t elementCount = workspace.totalElements();
+    workspace.generate(robot.getBody()->legs[0]);
+    Vec3* points = workspace.getPoints();
+    for (int i = 0; i < elementCount; i++) {
+        cout << points[i].x << ", " <<  points[i].y << ", " << points[i].z << endl;
+    }
+    cout << endl;
+
     // test server
     cout << "testing server" << endl;
     Server server(robot);

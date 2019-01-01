@@ -26,6 +26,7 @@
     float wrap(float value, float min, float max);
     float angleDifference(float angleA, float angleB);
     float solve_sas(float sideA, float sideB, float angle);
+    float mapRange(float x, float fromA, float fromB, float toA, float toB);
 
 #endif /* MATH_H */
 

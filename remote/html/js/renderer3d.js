@@ -76,6 +76,12 @@ class Renderer3d {
 	}
 
 	generateFloor(gridCount, gridSpacing) {
+		var floor = new THREE.Group();
+		floor.name = "floor";
+		floor.gridCount = gridCount;
+		floor.gridSpacing = gridSpacing;
+
+		// grid
 		var geometry = new THREE.Geometry();
 		for (var i = -gridCount; i <= gridCount; i++) {
 
@@ -89,11 +95,20 @@ class Renderer3d {
 		}
 
 		var material = new THREE.LineBasicMaterial({color: 0x003f7f});
-		var floor = new THREE.LineSegments(geometry, material);
-		floor.name = "floor";
+		var grid = new THREE.LineSegments(geometry, material);
+		floor.add(grid);
 
-		floor.gridCount = gridCount;
-		floor.gridSpacing = gridSpacing;
+		// transparent plane
+		var diameter = (gridCount * gridSpacing) * 2;
+		var geometry = new THREE.PlaneGeometry(diameter, diameter);
+		var material = new THREE.MeshBasicMaterial({
+			color: 0x000000,
+			transparent: true,
+			opacity: 0.5
+		});
+		var plane = new THREE.Mesh(geometry, material);
+		plane.position.z = -0.1;
+		floor.add(plane);
 
 		return floor;
 	}
@@ -101,12 +116,20 @@ class Renderer3d {
 	setRobot(robot) {
 		this.robot = robot;
 
-		if (this.robotDisplay) {
-			this.scene.remove(this.robotDisplay);
-		}
+		this.scene.remove(this.robotDisplay);
 		this.robotDisplay = this.getRobotDisplay(robot);
 		this.robotDisplay.add(this.camera);
 		this.scene.add(this.robotDisplay);
+	}
+
+	setWorkspaces(workspaces) {
+		this.robot.workspaces = workspaces;
+		var bodyDisplay = this.robotDisplay.getObjectByName("body");
+		for (var i = 0; i < this.robot.body.legs.length; i++) {
+			var workspaceDisplay = this.getWorkspaceDisplay(this.robot.workspaces[i]);
+			workspaceDisplay.name = "workspace" + i;
+			bodyDisplay.add(workspaceDisplay);
+		}
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,6 +284,25 @@ class Renderer3d {
 		}
 
 		return robotDisplay;
+	}
+
+	getWorkspaceDisplay(workspace) {
+		var workspaceDisplay = new THREE.Group();
+		workspaceDisplay.matrixAutoUpdate = false;
+
+		var material = new THREE.LineBasicMaterial({color: 0x003f7f});
+
+		var slices = workspace.slices();
+		var elements = workspace.elementsPerSlice();
+		for (var i = 0; i < slices; i++) {
+			var geometry = new THREE.Geometry();
+			for (var j = 0; j < elements; j++) {
+				geometry.vertices.push(workspace.points[elements * i + j]);
+			}
+			var slice = new THREE.LineLoop(geometry, material);
+			workspaceDisplay.add(slice);
+		}
+		return workspaceDisplay;
 	}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

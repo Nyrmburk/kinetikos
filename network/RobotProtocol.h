@@ -11,7 +11,6 @@ public:
 
     Robot& robot;
 
-    // I need to turn my functions into functors. after all, that's how I'm using them
     // control
     void controlBodyOrientation(T& remote, uint16_t opcode, DataView& data);
     void controlJoints(T& remote, uint16_t opcode, DataView& data);
@@ -26,6 +25,15 @@ public:
     void getBody(T& remote, uint16_t opcode, DataView& data) {
         this->send(remote, opcode, robot.getBody());
     }
+
+    void getWorkspaces(T& remote, uint16_t opcode, DataView& data) {
+        this->send(remote, opcode, [&](DataView& out){
+            for (int i = 0; i < robot.getBody()->legsCount; i++) {
+                robot.getWorkspaces()[i].serialize(&out);
+            }
+        });
+    }
+
     void isThisAPigeon(T& remote, uint16_t opcode, DataView& data) {
     }
     // states
@@ -43,6 +51,7 @@ public:
 
     enum Parameters {
         body = 100,
+        workspaces,
         pigeon = 300,
     };
 
@@ -57,6 +66,7 @@ public:
             case Control::navigation: return controlNavigationPath(remote, opcode, data);
             case Control::destination: return controlDestination(remote, opcode, data);
             case Parameters::body: return getBody(remote, opcode, data);
+            case Parameters::workspaces: return getWorkspaces(remote, opcode, data);
             case Parameters::pigeon: return isThisAPigeon(remote, opcode, data);
         }
     }
@@ -66,7 +76,6 @@ public:
             serializem4(&out, robot.getBodyOrientation());
         });
     }
-
 
     void publishJoints() {
         this->publish(Control::joints, Control::joints, [&](DataView& out) {

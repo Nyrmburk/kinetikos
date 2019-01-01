@@ -15,6 +15,7 @@
 #define ROBOT_H
 
 #include "Body.h"
+#include "Workspace.h"
 #include "../mapping/World.h"
 #include "../mapping/MotionPlan.h"
 #include "../animation/AnimationClip.h"
@@ -74,6 +75,10 @@ public:
     Bezier3Channel* getFootPaths() {
         return footPaths;
     }
+
+    Workspace* getWorkspaces() {
+        return workspaces;
+    }
     
     void simulationStep(float delta);
     void animationStep(float delta);
@@ -89,6 +94,8 @@ private:
     Vec3* feetHome;
     Bezier3Channel* footPaths;
     Mat4 orientation;
+
+    Workspace* workspaces;
 
     MotorControl* motorControl;
     JointsControl* jointsControl;

@@ -21,6 +21,11 @@ Robot::Robot() {
     feet = new Vec3[legsCount];
 
     identitym4(&orientation);
+
+    workspaces = new Workspace[legsCount];
+    for (int i = 0; i < legsCount; i++) {
+        workspaces[i].generate(body->legs[i]);
+    }
 }
 
 Robot::~Robot() {

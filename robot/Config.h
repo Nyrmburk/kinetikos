@@ -19,10 +19,11 @@ public:
         if (!in)
             return;
         streampos size = in.tellg();
-        char* json = new char[size];
+        char* json = new char[(size_t)size + 1];
         in.seekg(0, ios::beg);
         in.read(json, size);
         in.close();
+        json[size] = '\0';
 
         doc.Parse(json);
     }

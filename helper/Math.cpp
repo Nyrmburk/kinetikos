@@ -35,3 +35,7 @@ float solve_sas(float sideA, float sideB, float angle) {
     sideC = sqrt(sideC);
     return sideC;
 }
+
+float mapRange(float x, float fromA, float fromB, float toA, float toB) {
+    return (x - fromA) * (toB - toA) / (fromB - fromA) + toA;
+}

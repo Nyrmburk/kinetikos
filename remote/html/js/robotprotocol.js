@@ -1,5 +1,6 @@
 var parameters = {
-	body:        100
+	body:            100,
+	workspaces:      101
 }
 
 var control = {
@@ -31,6 +32,7 @@ class RobotProtocol extends Protocol {
 			case control.navigation: return this.handleNavigationPath(data);
 			case control.destination: return this.handleDestination(data);
 			case parameters.body: return this.handleBody(data);
+			case parameters.workspaces: return this.handleWorkspaces(data);
 		}
 	}
 
@@ -41,17 +43,13 @@ class RobotProtocol extends Protocol {
 		this.subscribe(this.Opcode.opSubscribe, control.joints);
 		this.subscribe(this.Opcode.opSubscribe, control.feet);
 		this.subscribe(this.Opcode.opSubscribe, control.orientation);
+		this.requestWorkspaces();
 	}
 
 	onclose(evt) {
 		console.log("socket closed");
 	}
 
-	subscribe(opcode, roomId) {
-		var s = {serialize: function(data) {data.setUint16(roomId)}};
-		this.sendSerial(opcode, s);
-	}
-	
 	handleBodyOrientation(data) {
 		for (var i = 0; i < 16; i++) {
 			this.robot.bodyOrientation.elements[i] = data.getFloat32();
@@ -90,6 +88,22 @@ class RobotProtocol extends Protocol {
 			this.robot.feet[i] = new THREE.Vector3();
 		}
 		renderer.setRobot(this.robot);
+	}
+
+	// request for the robot layout to be sent
+	requestWorkspaces() {
+		this.sendSerial(parameters.workspaces);
+	}
+
+	// get leg workspace data
+	handleWorkspaces(data) {
+		var workspaces = [];
+		for (var i = 0; i < this.robot.body.legs.length; i++) {
+			var workspace = new Workspace();
+			workspace.deserialize(data);
+			workspaces.push(workspace);
+		}
+		renderer.setWorkspaces(workspaces);
 	}
 }
 
