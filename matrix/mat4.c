@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include "mat4.h"
+#include <smmintrin.h>
 
 void setm4(Mat4 *to, const Mat4 *from) {
     for (int i = 0; i < TOTAL_SIZE_M4; i++)
@@ -42,19 +43,23 @@ void multm4m4(const Mat4 *from, const Mat4 *to, Mat4 *result) {
     const float *f = from->m;
     const float *t = to->m;
     float *r = result->m;
-    for (int i = 0; i < TOTAL_SIZE_M4; i++) {
 
-        int row = i % SIZE_M4;
-        int col = i / SIZE_M4 * SIZE_M4;
-
-        float dot = 0;
-        for (int j = 0; j < SIZE_M4; j++) {
-            dot += f[row] * t[col++];
-            row += SIZE_M4;
-        }
-
-        r[i] = dot;
-    }
+    r[0] = f[0] * t[0] + f[4] * t[1] + f[8] * t[2] + f[12] * t[3];
+    r[1] = f[1] * t[0] + f[5] * t[1] + f[9] * t[2] + f[13] * t[3];
+    r[2] = f[2] * t[0] + f[6] * t[1] + f[10] * t[2] + f[14] * t[3];
+    r[3] = f[3] * t[0] + f[7] * t[1] + f[11] * t[2] + f[15] * t[3];
+    r[4] = f[0] * t[4] + f[4] * t[5] + f[8] * t[6] + f[12] * t[7];
+    r[5] = f[1] * t[4] + f[5] * t[5] + f[9] * t[6] + f[13] * t[7];
+    r[6] = f[2] * t[4] + f[6] * t[5] + f[10] * t[6] + f[14] * t[7];
+    r[7] = f[3] * t[4] + f[7] * t[5] + f[11] * t[6] + f[15] * t[7];
+    r[8] = f[0] * t[8] + f[4] * t[9] + f[8] * t[10] + f[12] * t[11];
+    r[9] = f[1] * t[8] + f[5] * t[9] + f[9] * t[10] + f[13] * t[11];
+    r[10] = f[2] * t[8] + f[6] * t[9] + f[10] * t[10] + f[14] * t[11];
+    r[11] = f[3] * t[8] + f[7] * t[9] + f[11] * t[10] + f[15] * t[11];
+    r[12] = f[0] * t[12] + f[4] * t[13] + f[8] * t[14] + f[12] * t[15];
+    r[13] = f[1] * t[12] + f[5] * t[13] + f[9] * t[14] + f[13] * t[15];
+    r[14] = f[2] * t[12] + f[6] * t[13] + f[10] * t[14] + f[14] * t[15];
+    r[15] = f[3] * t[12] + f[7] * t[13] + f[11] * t[14] + f[15] * t[15];
 }
 
 void multm4v4(const Mat4 *from, const Vec4 *to, Vec4 *result) {
