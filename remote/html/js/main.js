@@ -15,7 +15,7 @@ window.onload = function() {
 	window.addEventListener('resize', function() {renderer.onResize()}, false);
 
 	joystick = new VirtualJoystick({
-			container : document.body, 
+			container : document.getElementById("all"),
 			mouseSupport : true, 
 			limitStickTravel : true, 
 			stickRadius : 150});
