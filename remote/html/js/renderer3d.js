@@ -11,8 +11,6 @@ class Renderer3d {
 		this.robot = robot;
 		this.robotDisplay;
 
-		var controls, gui;
-
 		this.resolution = new THREE.Vector2();
 		this.scene = new THREE.Scene();
 
@@ -39,8 +37,6 @@ class Renderer3d {
 		this.scene.add(this.generateFloor(20, 25));
 
 		this.onResize()
-
-		//this.initGUI();
 	}
 
 	initCamera() {
@@ -48,31 +44,6 @@ class Renderer3d {
 		this.camera.up = new THREE.Vector3(0, 0, 1);
 		this.camera.position.set(0, -250, 150);
 		this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-	}
-
-	initGUI() {
-		if (gui != null)
-			gui.destroy();
-		gui = new dat.GUI();
-
-		var servos = gui.addFolder("Servos");
-		this.robotContext.joints.forEach(function(val, i) {
-			servos.add(this.robotContext.joints, i, 0, 1).listen();
-		});
-
-		gui.add(robotControls, "height", 0.0, 80.0);
-		gui.add(robotControls, "pose");
-
-		setInterval(function(){
-			if (socket.readyState == WebSocket.OPEN) {
-				if (joystick) {
-					robotControls.velocity[1] = Double(-joystick.deltaY() / joystick._stickRadius);
-					robotControls.rotation = Double(-joystick.deltaX() / joystick._stickRadius);
-				}
-				robotControls.height = Double(robotControls.height.valueOf());
-				//network.send("controls", robotControls);
-			}
-		}, 50);
 	}
 
 	generateFloor(gridCount, gridSpacing) {
@@ -125,10 +96,15 @@ class Renderer3d {
 	setWorkspaces(workspaces) {
 		this.robot.workspaces = workspaces;
 		var bodyDisplay = this.robotDisplay.getObjectByName("body");
+		var workspaceDisplay = new THREE.Group();
+		workspaceDisplay.name = "workspace";
+		workspaceDisplay.matrixAutoUpdate = false;
+		bodyDisplay.add(workspaceDisplay);
+
 		for (var i = 0; i < this.robot.body.legs.length; i++) {
-			var workspaceDisplay = this.getWorkspaceDisplay(this.robot.workspaces[i]);
-			workspaceDisplay.name = "workspace" + i;
-			bodyDisplay.add(workspaceDisplay);
+			var display = this.getWorkspaceDisplay(this.robot.workspaces[i]);
+			display.name = i;
+			workspaceDisplay.add(display);
 		}
 	}
 

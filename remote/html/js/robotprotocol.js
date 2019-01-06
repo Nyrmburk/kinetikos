@@ -43,7 +43,10 @@ class RobotProtocol extends Protocol {
 		this.subscribe(this.Opcode.opSubscribe, control.joints);
 		this.subscribe(this.Opcode.opSubscribe, control.feet);
 		this.subscribe(this.Opcode.opSubscribe, control.orientation);
-		this.requestWorkspaces();
+
+		if (gui.workspace) {
+			this.requestWorkspaces();
+		}
 	}
 
 	onclose(evt) {
@@ -84,10 +87,16 @@ class RobotProtocol extends Protocol {
 	// create the model based on the layout information given here
 	handleBody(data) {
 		this.robot.body.deserialize(data);
+		this.robot.joints.length = 0;
 		for (var i = 0; i < this.robot.body.legs.length; i++) {
 			this.robot.feet[i] = new THREE.Vector3();
+
+			this.robot.joints[i*3] = 0.5;
+			this.robot.joints[i*3 + 1] = 0.5;
+			this.robot.joints[i*3 + 2] = 0.5;
 		}
 		renderer.setRobot(this.robot);
+		gui.setRobot(this.robot);
 	}
 
 	// request for the robot layout to be sent

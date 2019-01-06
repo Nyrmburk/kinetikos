@@ -2,6 +2,7 @@ var renderer;
 var client;
 var streamPlayer;
 var joystick;
+var gui;
 
 window.onload = function() {
 	console.log("Murphy the Spider Robot V2");
@@ -29,6 +30,8 @@ window.onload = function() {
 	//streamPlayer.connect(videoSocket);
 	//streamPlayer.connect(getUri(3000));
 
+	gui = new RobotGui();
+
 	var socket = new ReconnectingWebSocket(getUri(8080), null, {automaticOpen: false});
 	this.client = new Client(socket, robot);
 	socket.open();
@@ -48,4 +51,3 @@ function render() {
 	renderer.render();
 	requestAnimationFrame(render);
 }
-
