@@ -10,7 +10,7 @@ public:
 
     bool isGrounded(float cursor) {
         cursor = fmod(cursor, 1);
-        return strike < cursor && (cursor - strike) < duration;
+        return strike <= cursor && cursor < (strike + duration);
     }
 };
 
