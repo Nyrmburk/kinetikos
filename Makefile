@@ -6,7 +6,6 @@ VENDOR ?= ./_vendor
 REMOTE_VENDOR ?= ./remote/html/_vendor
 INCLUDE := $(VENDOR)/include
 
-
 TOOLCHAIN_DIR ?= ../toolchain
 
 TARGET ?= local
@@ -44,10 +43,14 @@ LIBRARIES = $(LIB_NAMES:%=$(OUT)/%)
 LIBS ?= -L$(BIN) -lm -lz -lssl -lcrypto -luWS
 CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
+LDFLAGS ?= -Wl,-rpath,'$$ORIGIN/bin'
 
 ifeq ($(RELEASE),debug)
 	CFLAGS += -g
 	CXXFLAGS += -g
+else ifeq ($(RELEASE),profile)
+	CFLAGS += -Ofast -g
+	CXXFLAGS += -Ofast -g
 else ifeq ($(RELEASE),release)
 	CFLAGS += -Ofast
 	CXXFLAGS += -Ofast
@@ -79,7 +82,7 @@ $(OUT)/%.cpp.o: %.cpp
 
 .PHONY: run
 run: default
-	@export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(shell pwd)/$(BIN) && $(RUNNER) $(OUT)/$(EXECUTABLE) $(ARGS)
+	$(RUNNER) $(OUT)/$(EXECUTABLE) $(ARGS)
 
 .PHONY: debug
 debug: RUNNER = gdb
