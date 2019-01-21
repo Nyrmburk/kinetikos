@@ -131,7 +131,6 @@ public:
             }
             for (int i = 0; i < footCount; i++) {
                 StepPlan& stepFuture = steps[i].back();
-                //cout << "leg: " << i << endl;
 
                 if (wasGrounded[i]) {
                     stepFuture.lift(time + future, &orientationFuture, &invOrientationFuture);
@@ -147,70 +146,40 @@ public:
                     Leg& leg = robot->getBody()->legs[i];
                     Vec3 rsFoot;
 
+                    // check if the current plan is outside of the workspace at lift-time
                     bool liftCollision = false;
                     stepFuture.getRsLiftPos(&rsFoot);
                     if (!isFootInWorkspace(&bodyOrientationFuture, &rsFoot, leg)) {
-                        //cout << "\tlift collision" << endl;
                         liftCollision = true;
                         if (steps[i].size() > 1) {
-                            //cout << "\treadjusting because foot = " << rsFoot.x << ", " << rsFoot.y << endl;
+                            // move the plan back into the workspace
                             addv3(&stepFuture.wsPosition, &diff, &stepFuture.wsPosition);
-                            //stepFuture.wsPosition.z = 0;
+                            // TODO snap the foot to the world position
                         } else {
-                            //cout << "\tlift abort" << endl;
                             abort = true;
                         }
                     }
 
+                    // check if the current plan is outside of the workspace at land-time
                     bool landCollision = false;
                     stepFuture.getRsLandPos(&rsFoot);
                     if (!isFootInWorkspace(&bodyOrientationFuture, &rsFoot, leg)) {
-                        //cout << "\tland collision" << endl;
                         landCollision = true;
                         if (steps[i].size() > 1) {
-                            //cout << "\treadjusting because foot = " << rsFoot.x << ", " << rsFoot.y << endl;
+                            // move the plan back into the workspace
                             subtractv3(&stepFuture.wsPosition, &diff, &stepFuture.wsPosition);
-                            //stepFuture.wsPosition.z = 0;
+                            // TODO snap the foot to the world position
                         } else {
-                            //cout << "\tland abort" << endl;
                             abort = true;
                         }
                     }
-
-                    if (liftCollision && landCollision) {
-                        //cout << "\tboth collision, so abort" << endl;
-                        abort = true;
-                    }
-
-                    if (true) continue;
-                    /*
-                    if (abort) {
-                        float cursorMod = fmod(cursor, 1.0);
-                        float offset = (gait[i].strike + gait[i].duration) - cursorMod;
-                        cursor += offset;
-                        break;
-                    }
-                    */
                 }
             }
-
-            /*
-            if (abort) {
-                for (int i = 0; i < footCount; i++) {
-                    steps[i].back() = stepsNow[i];
-                }
-                future -= delta;
-                cursorTimes[time + future] = cursor;
-                cout << "aborted" << endl;
-                //future -= delta;
-            }
-            */
 
             // check if foot landed?
             for (int i = 0; i < footCount; i++) {
                 bool grounded = gait[i].isGrounded(cursor);
                 if (wasGrounded[i] < grounded) {
-                    cout << "step landed; new stepplan: " << i << ", time: " << time + future << ", cursor: " << cursor << endl;
                     // landed
                     steps[i].emplace_back();
                     steps[i].back().land(time + future, &orientationFuture, &invOrientationFuture);
@@ -218,51 +187,15 @@ public:
                 }
                 wasGrounded[i] = grounded;
             }
-
-//            cout << cursor << endl;
-//            for (int i = 0; i < footCount; i++) {
-//                StepPlan& step = steps[i].back();
-                /*
-                if (wasGrounded[i]) { // wasGrounded is most current
-
-                    // test land and move by diff
-                    multm4v3(&step.invOrientationLand, &wsFutureFootPos[i], 1, &rsFoot);
-                    if (!isFootInWorkspace(&bodyOrientationFuture, &rsFoot, leg) && i == 0) {
-                        cout << "land" << endl;
-    //                    step.lift(time + future, &orientationFuture, &invOrientationFuture);
-                    }
-
-    //                step.getRsLiftPos(&rsFoot);
-                    multm4v3(&invOrientationFuture, &wsFutureFootPos[i], 1, &rsFoot);
-                    if (!isFootInWorkspace(&bodyOrientationFuture, &rsFoot, leg) && i == 0) {
-                        cout << "lift" << endl;
-                        float cursorMod = fmod(cursor, 1.0);
-                        float offset = (gait[i].strike + gait[i].duration) - cursorMod;
-                        //cursor += offset;
-                        //cursorTimes[time + future - delta] = cursor;
-                        //continue;
-                    }
-
-                    //step.lift(time + future, &orientationFuture, &invOrientationFuture);
-
-                    // test lift and if lift pos is bad, lift the leg
-                    // somehow don't commit the results though. not sure on that one
-                }
-                */
-//                setv3(&step.wsPosition, &wsFutureFootPos[i]);
-//            }
-
         } while (cursor < gaitCursor + 1);
         // after looping
 
         float simTimeFuture = time + delta;
         // update animation tweens
-        // TODO make sure that it's using data from an updated cursor?
         for (int i = 0; i < footCount; i++) {
             footChannels[i].clear();
             StepPlan& step = steps[i].front();
             StepPlan& stepNext = steps[i][1];
-            cout << "i: " << i << endl;
             if (gait[i].isGrounded(gaitCursor)) {
                 // current step is now grounded
                 // current land -> current lift
@@ -274,7 +207,6 @@ public:
                 setv3(&startNode.handle, &handle);
                 Tween<Bezier3::Node> start(startNode, step.landTime, easeLinear);
                 footChannels[i].insertTween(start);
-                cout << "\tland: " << startNode.point.x << ", time: " << step.landTime << endl;
                 
                 // current step lift
                 Bezier3::Node endNode;
@@ -282,7 +214,6 @@ public:
                 setv3(&endNode.handle, &handle);
                 Tween<Bezier3::Node> end(endNode, step.liftTime, easeNone);
                 footChannels[i].insertTween(end);
-                cout << "\tlift: " << endNode.point.x << ", time: " << step.liftTime << endl;
             } else {
                 // current step is now lifted
                 // current lift -> next land
@@ -294,7 +225,6 @@ public:
                 setv3(&startNode.handle, &handle);
                 Tween<Bezier3::Node> start(startNode, step.liftTime, easeQuadraticInOut);
                 footChannels[i].insertTween(start);
-                cout << "\tlift: " << startNode.point.x << ", time: " << step.liftTime << endl;
 
                 // next step land
                 Bezier3::Node endNode;
@@ -302,7 +232,6 @@ public:
                 setv3(&endNode.handle, &handle);
                 Tween<Bezier3::Node> end(endNode, stepNext.landTime, easeNone);
                 footChannels[i].insertTween(end);
-                cout << "\tland: " << endNode.point.x << ", time: " << stepNext.landTime << endl;
             }
         }
 
@@ -411,19 +340,15 @@ private:
     float getCursor(float cursor, float delta, float time, float maxSpeed) {
         float speed = delta; // should be calculated
 
-        cout << "time " << time << ", cursor " << cursor << endl;
         auto cursorTime = cursorTimes.upper_bound(time);
         if (cursorTime == cursorTimes.end()) {
             // no future cursor time, so falling back
             cursor += speed;
         } else {
-            cout << "plan: time: " << cursorTime->first << ", cursor: " << cursorTime->second << endl;
             cursor = mapRange(
                     delta, 0, cursorTime->first - time,
                     gaitCursor, cursorTime->second);
         }
-
-        cout << "got cursor " << cursor << endl;
 
         return cursor;
     }
