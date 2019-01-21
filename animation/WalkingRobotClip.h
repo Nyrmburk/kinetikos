@@ -124,7 +124,7 @@ public:
             Vec3 diff;
             Mat4 bodyOrientationFuture;
             bodyChannel->act(time + future, bodyOrientationFuture);
-            bool abort = false;
+            int abort = -1;
             StepPlan stepsNow[footCount];
             for (int i = 0; i < footCount; i++) {
                 stepsNow[i] = steps[i].back();
@@ -156,7 +156,7 @@ public:
                             addv3(&stepFuture.wsPosition, &diff, &stepFuture.wsPosition);
                             // TODO snap the foot to the world position
                         } else {
-                            abort = true;
+                            abort = i;
                         }
                     }
 
@@ -170,10 +170,25 @@ public:
                             subtractv3(&stepFuture.wsPosition, &diff, &stepFuture.wsPosition);
                             // TODO snap the foot to the world position
                         } else {
-                            abort = true;
+                            abort = i;
                         }
                     }
+
+                    if (liftCollision && landCollision) {
+                        abort = i;
+                    }
                 }
+            }
+
+            if (abort > -1) {
+                for (int i = 0; i < footCount; i++) {
+                    steps[i].back() = stepsNow[i];
+                }
+                future -= delta;
+
+                float cursorMod = fmod(cursor, 1.0);
+                float offset = (gait[abort].strike + gait[abort].duration) - cursorMod;
+                cursorTimes[time + future] = cursor + offset;
             }
 
             // check if foot landed?
@@ -184,6 +199,7 @@ public:
                     steps[i].emplace_back();
                     steps[i].back().land(time + future, &orientationFuture, &invOrientationFuture);
                     multm4v3(&orientationFuture, &robot->getFeetHome()[i], 1, &steps[i].back().wsPosition);
+                    cursorTimes[time + future] = cursor;
                 }
                 wasGrounded[i] = grounded;
             }
