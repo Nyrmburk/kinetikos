@@ -236,6 +236,9 @@ public:
         // after looping
 
         float simTimeFuture = time + delta;
+        robot->getMotionPlan()->orientationAt(delta, &orientationFuture);
+        inversem4(&orientationFuture, &invOrientationFuture);
+
         // update animation tweens
         for (int i = 0; i < footCount; i++) {
             footChannels[i].clear();
@@ -248,16 +251,16 @@ public:
 
                 // current step land
                 Bezier3::Node startNode;
-                step.getRsLandPos(&startNode.point);
+                multm4v3(&invOrientationNow, &step.wsPosition, 1, &startNode.point);
                 setv3(&startNode.handle, &handle);
-                Tween<Bezier3::Node> start(startNode, step.landTime, easeLinear);
+                Tween<Bezier3::Node> start(startNode, time, easeLinear);
                 footChannels[i].insertTween(start);
                 
                 // current step lift
                 Bezier3::Node endNode;
-                step.getRsLiftPos(&endNode.point);
+                multm4v3(&invOrientationFuture, &step.wsPosition, 1, &endNode.point);
                 setv3(&endNode.handle, &handle);
-                Tween<Bezier3::Node> end(endNode, step.liftTime, easeNone);
+                Tween<Bezier3::Node> end(endNode, simTimeFuture, easeNone);
                 footChannels[i].insertTween(end);
             } else {
                 // current step is now lifted
@@ -283,8 +286,6 @@ public:
         float oldCursor = gaitCursor;
         gaitCursor = getCursor(gaitCursor, delta, time, 0);
 
-        robot->getMotionPlan()->orientationAt(delta, &orientationFuture);
-        inversem4(&orientationFuture, &invOrientationFuture);
         for (int i = 0; i < footCount; i++) {
             bool wasGrounded = gait[i].isGrounded(oldCursor);
             bool grounded = gait[i].isGrounded(gaitCursor);
