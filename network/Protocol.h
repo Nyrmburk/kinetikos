@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../helper/Serializable.h"
+#include "../mapping/JoystickPlan.h"
 
 #define ROOM_ALL 0
 
@@ -57,11 +58,14 @@ public:
         send(remote, opcode, [s](DataView& out){s->serialize(&out);});
     }
 
-    void onConnect(T& remote) {
+    virtual void setUserData(T& remote, void* data) = 0;
+    virtual void* getUserData(T& remote) = 0;
+
+    virtual void onConnect(T& remote) {
         subscribe(ROOM_ALL, remote);
     }
 
-    void onDisconnect(T& remote) {
+    virtual void onDisconnect(T& remote) {
         unsubscribeAll(remote);
     }
 

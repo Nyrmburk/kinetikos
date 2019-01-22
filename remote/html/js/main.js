@@ -14,11 +14,19 @@ window.onload = function() {
 	renderer = new Renderer3d(rendererDiv, robot);
 	window.addEventListener('resize', function() {renderer.onResize()}, false);
 
+	var allContainer = document.getElementById("all");
 	joystick = new VirtualJoystick({
-			container : document.getElementById("all"),
-			mouseSupport : true, 
-			limitStickTravel : true, 
-			stickRadius : 150});
+			container: allContainer,
+			mouseSupport: true,
+			limitStickTravel: true,
+			stickRadius: 150});
+
+	allContainer.addEventListener("mousedown", joystickStart);
+	allContainer.addEventListener("touchstart", joystickStart);
+	allContainer.addEventListener("mousemove", joystickMove);
+	allContainer.addEventListener("touchmove", joystickMove);
+	allContainer.addEventListener("mouseup", joystickEnd);
+	allContainer.addEventListener("touchend", joystickEnd);
 
 	var videostreamDiv = document.getElementById("videostream");
 	var videoCanvas = document.createElement("canvas");
@@ -50,4 +58,26 @@ function getUri(port) {
 function render() {
 	renderer.render();
 	requestAnimationFrame(render);
+}
+
+var current = false;
+function joystickStart() {
+	current = true;
+	console.log("start");
+}
+
+function joystickMove() {
+	if (current) {
+		console.log("move");
+		var u = joystick.deltaX() / joystick._stickRadius;
+		var y = -joystick.deltaY() / joystick._stickRadius;
+
+		client.sendJoystick(0, y, u, 0);
+	}
+}
+
+function joystickEnd() {
+	current = false;
+	console.log("end");
+	client.sendJoystick(0, 0, 0, 0);
 }

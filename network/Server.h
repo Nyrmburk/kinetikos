@@ -32,7 +32,15 @@ public:
         remote->send(data.getBuffer(), bytesWritten, OpCode::BINARY);
         totalBytesWritten += bytesWritten;
     }
-    
+
+    void setUserData(WebSocket<SERVER>*& ws, void* data) {
+        ws->setUserData(data);
+    };
+
+    void* getUserData(WebSocket<SERVER>*& ws) {
+        return ws->getUserData();
+    };
+
     void run() {
         h.onMessage([&](WebSocket<SERVER> *ws, char *message, size_t length, OpCode opCode) {
             totalBytesRead += length;

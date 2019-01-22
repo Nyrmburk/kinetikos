@@ -11,7 +11,8 @@ var control = {
 	orientation:     204,
 	velocity:        205,
 	navigation:      206,
-	destination:     207
+	destination:     207,
+	joystick:        208
 }
 
 class RobotProtocol extends Protocol {
@@ -113,6 +114,17 @@ class RobotProtocol extends Protocol {
 			workspaces.push(workspace);
 		}
 		renderer.setWorkspaces(workspaces);
+	}
+
+	sendJoystick(x, y, u, v) {
+		this.sendSerial(control.joystick, {
+			serialize: function(data) {
+				data.setFloat32(x);
+				data.setFloat32(y);
+				data.setFloat32(u);
+				data.setFloat32(v);
+			}
+		});
 	}
 }
 

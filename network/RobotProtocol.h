@@ -3,6 +3,7 @@
 
 #include "../robot/Robot.h"
 #include "Protocol.h"
+#include "../mapping/JoystickPlan.h"
 
 template <typename T>
 class RobotProtocol : public Protocol<T> {
@@ -10,6 +11,7 @@ public:
     RobotProtocol(Robot& robot) : robot(robot) {}
 
     Robot& robot;
+    JoystickPlan* joystickPlan;
 
     // control
     void controlBodyOrientation(T& remote, uint16_t opcode, DataView& data);
@@ -20,6 +22,7 @@ public:
     void controlVelocity(T& remote, uint16_t opcode, DataView& data);
     void controlNavigationPath(T& remote, uint16_t opcode, DataView& data);
     void controlDestination(T& remote, uint16_t opcode, DataView& data);
+    void controlJoystick(T& remote, uint16_t opcode, DataView& data);
 
     // parameters
     void getBody(T& remote, uint16_t opcode, DataView& data) {
@@ -47,6 +50,7 @@ public:
         velocity,
         navigation,
         destination,
+        joystick,
     };
 
     enum Parameters {
@@ -65,10 +69,31 @@ public:
             case Control::velocity: return controlVelocity(remote, opcode, data);
             case Control::navigation: return controlNavigationPath(remote, opcode, data);
             case Control::destination: return controlDestination(remote, opcode, data);
+            case Control::joystick: return controlJoystick(remote, opcode, data);
             case Parameters::body: return getBody(remote, opcode, data);
             case Parameters::workspaces: return getWorkspaces(remote, opcode, data);
             case Parameters::pigeon: return isThisAPigeon(remote, opcode, data);
         }
+    }
+
+    struct RobotUserData {
+        JoystickPlan::JoystickPair* joysticks = nullptr;
+    };
+
+    void onConnect(T& remote) {
+        Protocol<T>::onConnect(remote);
+        RobotUserData* data = new RobotUserData();
+        this->setUserData(remote, data);
+    }
+
+    void onDisconnect(T& remote) {
+        Protocol<T>::onDisconnect(remote);
+        RobotUserData* data = (RobotUserData*)this->getUserData(remote);
+        if (joystickPlan && data->joysticks) {
+            joystickPlan->removeChannel(data->joysticks);
+        }
+        delete data->joysticks;
+        delete data;
     }
     
     void publishBodyOrientation() {

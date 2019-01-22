@@ -31,13 +31,25 @@ void multiplyv2s(Vec2 *from, float scalar, Vec2 *result) {
 }
 
 void dividev2v2(Vec2 *from, Vec2 *toDiv, Vec2 *result);
-void dividev2s(Vec2 *from, float scalar, Vec2 *result);
+void dividev2s(Vec2 *from, float scalar, Vec2 *result) {
+    result->x = from->x / scalar;
+    result->y = from->y / scalar;
+}
 float dotv2(Vec2 *from, Vec2 *toDot);
 void crossv2(Vec2 *from, Vec2 *toCross, Vec2 *result);
 float anglev2(Vec2 *from, Vec2 *toCompare);
 void reciprocalv2(Vec2 *vec, Vec2 *result);
 void negatev2(Vec2 *vec, Vec2 *result);
-float normalizedv2(Vec2 *vec, Vec2 *result);
+float normalizedv2(Vec2 *vec, Vec2 *result) {
+    float length = lengthv2(vec);
+    if (length != 0) {
+        dividev2s(vec, length, result);
+    } else {
+        result->x = 0;
+        result->y = 0;
+    }
+    return length;
+}
 void translatev2(Vec2 *from, Vec2 *delta);
 void rotatev2(Vec2 *from, Vec2 *center, float radians);
 void scalev2(Vec2 *from, Vec2 *center, float amount);

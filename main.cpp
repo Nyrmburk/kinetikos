@@ -16,13 +16,13 @@
 #include "animation/AnimationJson.h"
 #include "animation/RobotClip.h"
 #include "animation/WalkingRobotClip.h"
-#include "../mapping/VelocityPlan.h"
+#include "../mapping/JoystickPlan.h"
 #include "../matrix/vec2.h"
 
 using namespace std;
 
 int main(int argc, char** argv) {
- 
+
     cout << "loading robot config" << endl;
     Robot robot;
 
@@ -47,28 +47,29 @@ int main(int argc, char** argv) {
     Config cfg("config/robot.json");
     Gait gait[robot.getBody()->legsCount];
     cfg.getGait(gait, "alternating tripod");
+    //cfg.getGait(gait, "smooth tripod");
+    //cfg.getGait(gait, "ripple");
     WalkingRobotClip walk(&robot, gait);
     walk.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setAnimation(&walk);
 
-    Vec2 velocity = {0, 100};
-    VelocityPlan plan;
-    plan.set(velocity, 0);
+    JoystickPlan plan(300, 10, 1, 0);
     robot.setMotionPlan(&plan);
 
     cout << "initializing server" << endl;
     Server server(robot);
+    server.joystickPlan = &plan;
 
     server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
         robot.simulationStep(fDelta);
         walk.sim(fDelta);
-    }, 100);
+    }, 20);
 
     server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
         robot.animationStep(fDelta);
-    }, 10);
+    }, 20);
 
     server.addTimer([&](int delta) {
         server.publishBodyOrientation();
