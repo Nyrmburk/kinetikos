@@ -15,9 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include "mat4.h"
-#include <smmintrin.h>
 
 void setm4(Mat4 *to, const Mat4 *from) {
     for (int i = 0; i < TOTAL_SIZE_M4; i++)

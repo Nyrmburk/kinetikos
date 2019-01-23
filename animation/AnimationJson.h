@@ -17,7 +17,7 @@ using namespace rapidjson;
 
 class AnimationJson {
 public:
-    AnimationJson(string path) {
+    AnimationJson(const string& path) {
         ifstream in(path, ios::in|ios::binary|ios::ate);
         if (!in)
             return;

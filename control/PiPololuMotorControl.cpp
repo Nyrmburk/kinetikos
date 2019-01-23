@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+#ifdef PIPOLOLU
 #include "PiPololuMotorControl.h"
 
 PiPololuMotorControl::PiPololuMotorControl() throw (int) {
@@ -44,3 +45,4 @@ void PiPololuMotorControl::setMotors(float joints[], int numJoints) {
         writeServo(servo, joints[servo++]); // tibia
     }
 }
+#endif

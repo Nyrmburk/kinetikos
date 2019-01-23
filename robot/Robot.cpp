@@ -6,14 +6,11 @@
  */
 
 #include "Robot.h"
-#include "Config.h"
 #include <algorithm>
 
-Robot::Robot() {
-    Config cfg("config/robot.json");
-
+Robot::Robot(Config& config) {
     body = new Body();
-    cfg.getBody(body);
+    config.getBody(body);
 
     int legsCount = body->legsCount;
 

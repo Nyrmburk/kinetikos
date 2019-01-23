@@ -1,4 +1,5 @@
 #include "test.h"
+#include "../helper/File.h"
 
 using namespace std;
 
@@ -42,7 +43,8 @@ int test() {
     Bezier3Channel splineChannel;
   
     // test robot
-    Robot robot;
+    Config config(origin() + "/config/robot.json");
+    Robot robot(config);
 
     // test body
     Body* body = robot.getBody();

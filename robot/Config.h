@@ -14,7 +14,7 @@ using namespace rapidjson;
 
 class Config {
 public:
-    Config(string path) {
+    Config(const string& path) {
         ifstream in(path, ios::in|ios::binary|ios::ate);
         if (!in)
             return;

@@ -8,6 +8,9 @@ INCLUDE := $(VENDOR)/include
 
 TOOLCHAIN_DIR ?= ../toolchain
 
+TOOLCHAIN ?= $(shell $(CC) -dumpmachine)
+TOOLCHAIN ?= $(shell $(CXX) -dumpmachine)
+
 TARGET ?= local
 ifeq ($(TARGET),arm)
 $(eval ARMTC = $(shell pwd)/$(TOOLCHAIN_DIR)/arm/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64)
@@ -15,9 +18,6 @@ $(eval ARMTC = $(shell pwd)/$(TOOLCHAIN_DIR)/arm/arm-bcm2708/gcc-linaro-arm-linu
 	CXX = $(ARMTC)/bin/arm-linux-gnueabihf-g++
 	CPATH = $(ARMTC)/arm-linux-gnueabihf/libc/usr/include:$(ARMTC)/arm-linux-gnueabihf/libc/include/arm-linux-gnyeabihf
 endif
-
-TOOLCHAIN ?= $(shell $(CC) -dumpmachine)
-TOOLCHAIN ?= $(shell $(CXX) -dumpmachine)
 
 RELEASE ?= debug
 
@@ -27,9 +27,7 @@ RUNNER :=
 
 ARGS :=
 
-EXCLUDE := "control/PiPololuMotorControl.cpp"
-
-SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(addprefix -e ,$(EXCLUDE)) | grep -v $(VENDOR) | grep -v $(TOOLCHAIN))
+SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(VENDOR) | grep -v $(TOOLCHAIN))
 OBJS = $(SRCS:%=$(OUT)/%.o)
 DEPS = $(OBJS:.o=.d)
 
@@ -45,6 +43,12 @@ CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
 LDFLAGS ?= -Wl,-rpath,'$$ORIGIN/bin'
 
+ifeq ($(TARGET),arm)
+	CFLAGS += -D PIPOLOLU
+	CXXFLAGS += -D PIPOLOLU
+	LIBS += -L$(TOOLCHAIN_DIR)/arm/rootfs/usr/local/lib -lwiringPi
+endif
+
 ifeq ($(RELEASE),debug)
 	CFLAGS += -g
 	CXXFLAGS += -g
@@ -56,7 +60,7 @@ else ifeq ($(RELEASE),release)
 	CXXFLAGS += -Ofast
 endif
 
-default: vendor $(OUT)/$(EXECUTABLE)
+default: vendor $(OUT)/$(EXECUTABLE) $(OUT)/config
 
 $(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
@@ -68,6 +72,10 @@ $(OUT)/%.c.o: %.c
 $(OUT)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBS) -c $< -o $@
+
+$(OUT)/config: config
+	@mkdir -p $(dir $@)
+	cp -r $< $@
 
 %/libuWS.so:
 	$(MAKE) -B -C $(VENDOR)/uWebSockets \

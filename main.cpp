@@ -18,16 +18,17 @@
 #include "animation/WalkingRobotClip.h"
 #include "../mapping/JoystickPlan.h"
 #include "../matrix/vec2.h"
+#include "../helper/File.h"
 
 using namespace std;
 
 int main(int argc, char** argv) {
-
     cout << "loading robot config" << endl;
-    Robot robot;
+    Config config(origin() + "/config/robot.json");
+    Robot robot(config);
 
     cout << "loading robot animations" << endl;
-    AnimationJson homeAnimation("config/animations/home.json");
+    AnimationJson homeAnimation(origin() + "/config/animations/home.json");
     RobotClip home = homeAnimation.getAnimation();
     Mat4 orientation;
     Vec3 feetHome[robot.getBody()->legsCount];
@@ -39,16 +40,15 @@ int main(int argc, char** argv) {
     robot.setFeetHome(feetHome);
     robot.setAnimation(&home);
     
-    AnimationJson demoAnimation("config/animations/demo.json");
+    AnimationJson demoAnimation(origin() + "/config/animations/demo.json");
     RobotClip demo = demoAnimation.getAnimation();
     demo.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setAnimation(&demo);
 
-    Config cfg("config/robot.json");
     Gait gait[robot.getBody()->legsCount];
-    cfg.getGait(gait, "alternating tripod");
-    //cfg.getGait(gait, "smooth tripod");
-    //cfg.getGait(gait, "ripple");
+    config.getGait(gait, "alternating tripod");
+    //config.getGait(gait, "smooth tripod");
+    //config.getGait(gait, "ripple");
     WalkingRobotClip walk(&robot, gait);
     walk.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setAnimation(&walk);

@@ -16,6 +16,7 @@
 
 #include "Body.h"
 #include "Workspace.h"
+#include "Config.h"
 #include "../mapping/World.h"
 #include "../mapping/MotionPlan.h"
 #include "../animation/AnimationClip.h"
@@ -30,7 +31,7 @@ class MotorControl;
 
 class Robot {
 public:
-    Robot();
+    Robot(Config& config);
     virtual ~Robot();
     
     Body* getBody();
