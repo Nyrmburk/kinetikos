@@ -92,9 +92,11 @@ public:
 
         float future = 0; // delta between now and future sim
         float cursor = gaitCursor; // future sim cursor position
+        bool wasGroundedNow[footCount];
         bool wasGrounded[footCount];
         for (int i = 0; i < footCount; i++) {
-            wasGrounded[i] = gait[i].isGrounded(cursor);
+            wasGroundedNow[i] = isGrounded(i, steps[i].front(), cursor);
+            wasGrounded[i] = wasGroundedNow[i];
         }
 
         do {
@@ -244,7 +246,7 @@ public:
             footChannels[i].clear();
             StepPlan& step = steps[i].front();
             StepPlan& stepNext = steps[i][1];
-            if (gait[i].isGrounded(gaitCursor)) {
+            if (isGrounded(i, step, gaitCursor)) {
                 // current step is now grounded
                 // current land -> current lift
                 Vec3 handle = {0, 0, 0};
@@ -287,13 +289,12 @@ public:
         gaitCursor = getCursor(gaitCursor, delta, time, 0);
 
         for (int i = 0; i < footCount; i++) {
-            bool wasGrounded = gait[i].isGrounded(oldCursor);
-            bool grounded = gait[i].isGrounded(gaitCursor);
-            if (wasGrounded < grounded) {
+            bool grounded = isGrounded(i, steps[i].front(), gaitCursor);
+            if (wasGroundedNow[i] < grounded) {
                 // landed
                 steps[i].pop_front();
                 stepsNow[i] = steps[i].front();
-            } else if (wasGrounded > grounded) {
+            } else if (wasGroundedNow[i] > grounded) {
                 // lifted
                 stepsNow[i].lift(simTimeFuture, &orientationFuture, &invOrientationFuture);
             }
@@ -397,6 +398,15 @@ private:
         }
 
         return cursor;
+    }
+
+    bool isGrounded(int i, StepPlan& step, float cursor) {
+        Vec3 rsPos;
+        step.getRsLiftPos(&rsPos);
+        float distanceFromHome = distancev3(&rsPos, &robot->getFeetHome()[i]);
+        step.getRsLandPos(&rsPos);
+        distanceFromHome = max(distanceFromHome, distancev3(&rsPos, &robot->getFeetHome()[i]));
+        return gait[i].isGrounded(cursor) || distanceFromHome < 10;
     }
 
     void clearFutureVoidedPlans(float voidTime) {
