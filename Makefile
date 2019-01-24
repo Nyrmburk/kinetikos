@@ -38,16 +38,10 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 LIB_NAMES := libuWS.so
 BIN ?= $(OUT)/bin
 LIBRARIES = $(LIB_NAMES:%=$(OUT)/%)
-LIBS ?= -L$(BIN) -lm -lz -lssl -lcrypto -luWS
+LIBS ?= -L$(BIN) -luWS -lwiringPi -lm -lz -lssl -lcrypto -lpthread -lrt -lcrypt
 CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
 LDFLAGS ?= -Wl,-rpath,'$$ORIGIN/bin'
-
-ifeq ($(TARGET),arm)
-	CFLAGS += -D PIPOLOLU
-	CXXFLAGS += -D PIPOLOLU
-	LIBS += -L$(TOOLCHAIN_DIR)/arm/rootfs/usr/local/lib -lwiringPi
-endif
 
 ifeq ($(RELEASE),debug)
 	CFLAGS += -g
@@ -62,7 +56,7 @@ endif
 
 default: vendor $(OUT)/$(EXECUTABLE) $(OUT)/config
 
-$(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so
+$(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so $(BIN)/libwiringPi.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
 
 $(OUT)/%.c.o: %.c
@@ -84,7 +78,14 @@ $(OUT)/config: config
 		CPATH=$(CPATH)
 	mkdir -p $*
 	cp $(VENDOR)/uWebSockets/libuWS.so $*/
-	ls $*
+
+%/libwiringPi.so:
+	$(MAKE) -B -C $(VENDOR)/wiringPi/wiringPi \
+		CC=$(CC) \
+		CXX=$(CXX) \
+		CPATH=$(CPATH)
+	mkdir -p $*
+	cp $(VENDOR)/wiringPi/wiringPi/libwiringPi.so.* $@
 
 -include $(DEPS)
 

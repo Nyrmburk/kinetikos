@@ -80,27 +80,35 @@ public:
     Workspace* getWorkspaces() {
         return workspaces;
     }
+
+    MotorControl* getMotorControl() {
+        return motorControl;
+    }
+
+    void setMotorControl(MotorControl* motorControl) {
+        this->motorControl = motorControl;
+    }
     
     void simulationStep(float delta);
     void animationStep(float delta);
 private:
-    Body* body;
-    World* world;
+    Body* body = nullptr;
+    World* world = nullptr;
     AnimationClip* currentAnimation = nullptr;
     MotionPlan* plan = nullptr;
 
     Mat4 bodyOrientation;
-    Joints* joints;
-    Vec3* feet;
-    Vec3* feetHome;
-    Bezier3Channel* footPaths;
+    Joints* joints = nullptr;
+    Vec3* feet = nullptr;
+    Vec3* feetHome = nullptr;
+    Bezier3Channel* footPaths = nullptr;
     Mat4 orientation;
 
-    Workspace* workspaces;
+    Workspace* workspaces = nullptr;
 
-    MotorControl* motorControl;
-    JointsControl* jointsControl;
-    FootControl* footControl;
+    MotorControl* motorControl = nullptr;
+    JointsControl* jointsControl = nullptr;
+    FootControl* footControl = nullptr;
 };
 
 #endif /* ROBOT_H */

@@ -4,15 +4,10 @@
  * and open the template in the editor.
  */
 
-#ifdef PIPOLOLU
 #include "PiPololuMotorControl.h"
 
-PiPololuMotorControl::PiPololuMotorControl() throw (int) {
-    
-    wiringPiSetup();
-    fd = serialOpen(DEVICE, BAUD);
-    
-    if (!fd) throw 1;
+PiPololuMotorControl::PiPololuMotorControl(int fd) {
+    this->fd = fd;
     
     // clears the error status
     // required because the pi has a known serial glitch that causes the servo controller to enter error mode
@@ -25,7 +20,6 @@ PiPololuMotorControl::~PiPololuMotorControl() {
 }
 
 void PiPololuMotorControl::writeServo(int servo, float angle) {
-    
     // map [0, 1] to [servoMin, servoMax]
     unsigned short servoPosition = (short) 
             (angle * (SERVO_MAX - SERVO_MIN) + SERVO_MIN);
@@ -36,13 +30,16 @@ void PiPololuMotorControl::writeServo(int servo, float angle) {
     serialPutchar(fd, (servoPosition >> 7) & 0x7F);
 }
 
-void PiPololuMotorControl::setMotors(float joints[], int numJoints) {
-    
+void PiPololuMotorControl::setMotors(Joints* joints, int numJoints) {
     int servo = 0;
     for (unsigned char i = 0; i < numJoints; i++) {
-        writeServo(servo, joints[servo++]); // coxa
-        writeServo(servo, joints[servo++]); // femur
-        writeServo(servo, joints[servo++]); // tibia
+        writeServo(servo++, joints[i].coxa);
+        writeServo(servo++, joints[i].femur);
+        writeServo(servo++, joints[i].tibia);
     }
 }
-#endif
+
+
+int PiPololuMotorControl::getSerial() {
+    return serialOpen(DEVICE, BAUD);
+}

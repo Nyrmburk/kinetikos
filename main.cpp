@@ -19,6 +19,7 @@
 #include "../mapping/JoystickPlan.h"
 #include "../matrix/vec2.h"
 #include "../helper/File.h"
+#include "../control/PiPololuMotorControl.h"
 
 using namespace std;
 
@@ -27,11 +28,17 @@ int main(int argc, char** argv) {
     Config config(origin() + "/config/robot.json");
     Robot robot(config);
 
+    int fd = PiPololuMotorControl::getSerial();
+    if (fd >= 0) {
+        robot.setMotorControl(new PiPololuMotorControl(fd));
+    }
+
+    int legsCount = robot.getBody()->legsCount;
     cout << "loading robot animations" << endl;
     AnimationJson homeAnimation(origin() + "/config/animations/home.json");
     RobotClip home = homeAnimation.getAnimation();
     Mat4 orientation;
-    Vec3 feetHome[robot.getBody()->legsCount];
+    Vec3 feetHome[legsCount];
     home.setTargets(&orientation, feetHome);
     home.step(0);
     home.setTargets(robot.getBodyOrientation(), robot.getFeet());
@@ -45,7 +52,7 @@ int main(int argc, char** argv) {
     demo.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setAnimation(&demo);
 
-    Gait gait[robot.getBody()->legsCount];
+    Gait gait[legsCount];
     config.getGait(gait, "alternating tripod");
     //config.getGait(gait, "smooth tripod");
     //config.getGait(gait, "ripple");
@@ -60,17 +67,24 @@ int main(int argc, char** argv) {
     Server server(robot);
     server.joystickPlan = &plan;
 
+    // simulate
     server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
         robot.simulationStep(fDelta);
         walk.sim(fDelta);
     }, 20);
 
+    // animate
     server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
         robot.animationStep(fDelta);
+        MotorControl* motorControl = robot.getMotorControl();
+        if (motorControl) {
+            motorControl->setMotors(robot.getJoints(), legsCount);
+        }
     }, 20);
 
+    // server publish data to clients
     server.addTimer([&](int delta) {
         server.publishBodyOrientation();
         server.publishJoints();

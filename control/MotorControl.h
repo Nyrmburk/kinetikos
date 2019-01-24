@@ -14,11 +14,11 @@
 #ifndef MOTOR_CONTROL_H
 #define MOTOR_CONTROL_H
 
-#include "../robot/Body.h"
+#include "../robot/Leg.h"
 
 class MotorControl {
 public:
-    virtual void setMotors(float joints[], int numJoints) = 0;
+    virtual void setMotors(Joints* joints, int numJoints) = 0;
 };
 
 #endif /* MOTOR_CONTROL_H */

@@ -6,6 +6,7 @@
  */
 
 #include "Robot.h"
+
 #include <algorithm>
 
 Robot::Robot(Config& config) {

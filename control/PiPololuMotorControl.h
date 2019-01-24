@@ -35,10 +35,11 @@
     
 class PiPololuMotorControl : public MotorControl {
 public:
-    PiPololuMotorControl() throw (int);
+    PiPololuMotorControl(int fd);
     virtual ~PiPololuMotorControl();
     void writeServo(int servo, float angle) ;
-    void setMotors(float joints[], int numJoints);
+    void setMotors(Joints* joints, int numJoints);
+    static int getSerial();
 private:
     int fd;
 };
