@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     walk.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setAnimation(&walk);
 
-    JoystickPlan plan(300, 10, 1, 0);
+    JoystickPlan plan(500, 10, 3, 0);
     robot.setMotionPlan(&plan);
 
     cout << "initializing server" << endl;

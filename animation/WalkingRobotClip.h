@@ -140,32 +140,38 @@ public:
                         dividev3s(&diff, 2, &diff);
                         Vec3& wsPos = stepFuture.wsPosition;
                         addv3(&wsPos, &diff, &wsPos);
+
+                        float footSeparation = 50;
+                        for (int j = 0; j < footCount; j++) {
+                            if (i == j || lengthv3(&diff) < 0.01) {
+                                continue;
+                            }
+
+                            Vec3 footDiff;
+                            subtractv3(&steps[j].back().wsPosition, &wsPos, &footDiff);
+                            float distance = lengthv3(&footDiff);
+                            float angle = fabs(anglev3(&footDiff, &diff));
+                            angle = min(angle, fabs(anglev3(&diff, &footDiff)));
+                            if (distance < footSeparation) {
+                                if (angle < M_PI_2) {
+                                    abort = i;
+                                } else {
+                                    multiplyv3s(&footDiff, -1 / distance, &footDiff);
+                                    addv3(&wsPos, &footDiff, &wsPos);
+                                }
+                            }
+                        }
+
                     }
+
 
                     Leg& leg = robot->getBody()->legs[i];
                     Vec3 rsFoot;
 
-                    bool footCollision = false;
-                    float footSeparation = 50;
-
                     // check if the current plan is outside of the workspace at lift-time
                     bool liftCollision = false;
                     stepFuture.getRsLiftPos(&rsFoot);
-                    for (int j = 0; j < footCount; j++) {
-                        if (i == j) {
-                            continue;
-                        }
-                        Vec3 landPos;
-                        steps[j].back().getRsLandPos(&landPos);
-
-                        float distance = distancev3(&rsFoot, &landPos);
-
-                        if (distance < footSeparation) {
-                            footCollision = true;
-                        }
-                    }
-                    if (!isFootInWorkspace(&bodyOrientationFuture, &rsFoot, leg) ||
-                            footCollision) {
+                    if (!isFootInWorkspace(&bodyOrientationFuture, &rsFoot, leg)) {
                         liftCollision = true;
                         if (steps[i].size() > 1) {
                             // move the plan back into the workspace
@@ -179,21 +185,6 @@ public:
                     // check if the current plan is outside of the workspace at land-time
                     bool landCollision = false;
                     stepFuture.getRsLandPos(&rsFoot);
-                    footCollision = false;
-                    for (int j = 0; j < footCount; j++) {
-                        if (i == j) {
-                            continue;
-                        }
-                        Vec3 liftPos;
-                        steps[j].back().getRsLiftPos(&liftPos);
-
-                        float distance = distancev3(&rsFoot, &liftPos);
-
-                        if (distance < footSeparation) {
-                            footCollision = true;
-                            abort = i;
-                        }
-                    }
                     if (!isFootInWorkspace(&bodyOrientationFuture, &rsFoot, leg)) {
                         landCollision = true;
                         if (steps[i].size() > 1) {

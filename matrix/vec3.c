@@ -50,9 +50,16 @@ void dividev3s(const Vec3 *from, float scalar, Vec3 *result) {
     result->z = from->z / scalar;
 }
 
-float dotv3(const Vec3 *from, const Vec3 *toDot);
+float dotv3(const Vec3 *from, const Vec3 *toDot) {
+    return from->x * toDot->x + from->y * toDot->y + from->z * toDot->z;
+}
+
 void crossv3(const Vec3 *from, const Vec3 *toCross, Vec3 *result);
-float anglev3(const Vec3 *from, const Vec3 *toCompare);
+
+float anglev3(const Vec3 *from, const Vec3 *toCompare) {
+    return acos(dotv3(from, toCompare) / (lengthv3(from) * lengthv3(toCompare)));
+}
+
 void reciprocalv3(const Vec3 *vec, Vec3 *result);
 
 void negatev3(const Vec3 *vec, Vec3 *result) {
