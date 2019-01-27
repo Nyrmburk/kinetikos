@@ -30,7 +30,10 @@ int main(int argc, char** argv) {
 
     int fd = PiPololuMotorControl::getSerial();
     if (fd >= 0) {
+        cout << "using Pololu Mini Maestro motor controller" << endl;
         robot.setMotorControl(new PiPololuMotorControl(fd));
+    } else {
+        cout << "not using a motor controller" << endl;
     }
 
     int legsCount = robot.getBody()->legsCount;
