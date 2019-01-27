@@ -18,6 +18,7 @@ echo "Setting up $NAME..."
 # add a new user with no full name/phone number/...
 # prompts the user for a password
 adduser --gecos "" kinetikos
+usermod -a -G dialout,video kinetikos
 
 echo "updating apt"
 apt -y update
