@@ -3,7 +3,8 @@ EXECUTABLE ?= kinetikos
 BUILD_DIR ?= ./_build
  
 VENDOR ?= ./_vendor
-REMOTE_VENDOR ?= ./remote/html/_vendor
+REMOTE ?= remote/html
+REMOTE_VENDOR ?= $(REMOTE)/_vendor
 INCLUDE := $(VENDOR)/include
 
 TOOLCHAIN_DIR ?= ../toolchain
@@ -31,6 +32,12 @@ SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(VENDOR) | grep -v
 OBJS = $(SRCS:%=$(OUT)/%.o)
 DEPS = $(OBJS:.o=.d)
 
+REMOTE_OUTS := \
+	$(OUT)/$(REMOTE)/index.html \
+	$(OUT)/$(REMOTE)/min.js \
+	$(OUT)/$(REMOTE)/style.css \
+	$(OUT)/$(REMOTE)/favicon.png
+
 INC_DIRS := $(shell find -type d | grep -v $(BUILD_DIR) | grep -v $(VENDOR) | grep -v .git) $(VENDOR)/include
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
@@ -54,7 +61,7 @@ else ifeq ($(RELEASE),release)
 	CXXFLAGS += -Ofast
 endif
 
-default: vendor $(OUT)/$(EXECUTABLE) $(OUT)/config
+default: vendor $(OUT)/$(EXECUTABLE) $(OUT)/config $(REMOTE_OUTS)
 
 $(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so $(BIN)/libwiringPi.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
@@ -87,6 +94,41 @@ $(OUT)/config: config
 	mkdir -p $*
 	cp $(VENDOR)/wiringPi/wiringPi/libwiringPi.so.* $@
 
+JS ?= \
+	$(REMOTE)/_vendor/h264-live-player/vendor/dist/http-live-player.js \
+	$(REMOTE)/_vendor/three.js/build/three.js \
+	$(REMOTE)/_vendor/three.js/examples/js/WebGL.js \
+	$(REMOTE)/_vendor/stats.js/build/stats.min.js \
+	$(REMOTE)/_vendor/dat.gui/build/dat.gui.min.js \
+	$(REMOTE)/_vendor/THREE.MeshLine/src/THREE.MeshLine.js \
+	$(REMOTE)/_vendor/virtualjoystick.js/virtualjoystick.js \
+	$(REMOTE)/_vendor/reconnecting-websocket/reconnecting-websocket.js \
+	$(REMOTE)/js/dataview2.js \
+	$(REMOTE)/js/protocol.js \
+	$(REMOTE)/js/robotprotocol.js \
+	$(REMOTE)/js/robotgui.js \
+	$(REMOTE)/js/client.js \
+	$(REMOTE)/js/robot.js \
+	$(REMOTE)/js/renderer3d.js \
+	$(REMOTE)/js/main.js
+
+
+$(OUT)/%/min.js: $(JS)
+	@mkdir -p $(dir $@)
+	uglifyjs -o $@ -c -m -- $^
+
+$(OUT)/%/index.html: $(REMOTE)/index_min.html
+	@mkdir -p $(dir $@)
+	cp $^ $@
+
+$(OUT)/%/favicon.png: $(REMOTE)/favicon.png
+	@mkdir -p $(dir $@)
+	cp $^ $@
+
+$(OUT)/%/style.css: $(REMOTE)/style.css
+	@mkdir -p $(dir $@)
+	cp $^ $@
+
 -include $(DEPS)
 
 .PHONY: run
@@ -100,6 +142,10 @@ debug: run
 .PHONY: memcheck
 memcheck: RUNNER = valgrind
 memcheck: run
+
+.PHONY: push
+push: default
+	cd $(OUT) && rsync -avR `find -type f -not -name "*.[do]"` kinetikos@kinetikos.local:
 
 .PHONY: clean
 clean:
