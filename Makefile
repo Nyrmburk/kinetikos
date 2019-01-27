@@ -145,7 +145,7 @@ memcheck: run
 
 .PHONY: push
 push: default
-	cd $(OUT) && rsync -avR `find -type f -not -name "*.[do]"` kinetikos@kinetikos.local:
+	cd $(OUT) && rsync -avR `find -type f -not -name "*.[do]"` kinetikos@$(HOST):
 
 .PHONY: clean
 clean:
