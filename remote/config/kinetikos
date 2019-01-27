@@ -1,13 +1,17 @@
 #!/bin/sh
 
 ### BEGIN INIT INFO
-# Provides:    kinetikos
+# Provides: kinetikos
+# Required-Start: $remote_fs $syslog
+# Required-Stop: $remote_fs $syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
 # Description: kinetikos robot server
 ### END INIT INFO
 
 start() {
-	# start the robot server
-	/home/kinetikos/kinetikos &
+	# start the robot server as the kinetikos user
+	su -c "/home/kinetikos/kinetikos &" kinetikos
 
 	# disable wifi power optimizations
 	iwconfig wlan0 power off
@@ -35,4 +39,4 @@ case "$1" in
        echo "Usage: $0 {start|stop|status|restart}"
 esac
 
-exit 0 
+exit 0

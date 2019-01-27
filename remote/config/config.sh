@@ -36,3 +36,4 @@ echo "config AP"
 
 echo "config startup"
 cp kinetikos /etc/init.d/kinetikos
+update-rc.d kinetikos defaults
