@@ -155,15 +155,22 @@ public:
                             if (distance < footSeparation) {
                                 if (angle < M_PI_2) {
                                     abort = i;
+                                    break;
                                 } else {
                                     multiplyv3s(&footDiff, -1 / distance, &footDiff);
                                     addv3(&wsPos, &footDiff, &wsPos);
                                 }
                             }
                         }
-
+                        //if (abort > -1) {
+                        //    break;
+                        //}
                     }
 
+                    if (distanceFromHome(stepFuture, &robot->getFeetHome()[i]) > 50) {
+                        abort = i;
+                        break;
+                    }
 
                     Leg& leg = robot->getBody()->legs[i];
                     Vec3 rsFoot;
@@ -179,6 +186,7 @@ public:
                             // TODO snap the foot to the world position
                         } else {
                             abort = i;
+                            break;
                         }
                     }
 
@@ -193,11 +201,13 @@ public:
                             // TODO snap the foot to the world position
                         } else {
                             abort = i;
+                            break;
                         }
                     }
 
                     if (liftCollision && landCollision) {
                         abort = i;
+                        break;
                     }
                 }
             }
@@ -391,13 +401,18 @@ private:
         return cursor;
     }
 
-    bool isGrounded(int i, StepPlan& step, float cursor) {
+    float distanceFromHome(StepPlan& step, Vec3* home) {
         Vec3 rsPos;
         step.getRsLiftPos(&rsPos);
-        float distanceFromHome = distancev3(&rsPos, &robot->getFeetHome()[i]);
+        float distance = distancev3(&rsPos, home);
         step.getRsLandPos(&rsPos);
-        distanceFromHome = max(distanceFromHome, distancev3(&rsPos, &robot->getFeetHome()[i]));
-        return gait[i].isGrounded(cursor) || distanceFromHome < 10;
+        distance = max(distance, distancev3(&rsPos, home));
+        return distance;
+    }
+
+    bool isGrounded(int i, StepPlan& step, float cursor) {
+        float distance = distanceFromHome(step, &robot->getFeetHome()[i]);
+        return gait[i].isGrounded(cursor) || distance < 10;
     }
 
     void clearFutureVoidedPlans(float voidTime) {
