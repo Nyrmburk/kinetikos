@@ -1,0 +1,38 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:    kinetikos
+# Description: kinetikos robot server
+### END INIT INFO
+
+start() {
+	# start the robot server
+	/home/kinetikos/kinetikos &
+
+	# disable wifi power optimizations
+	iwconfig wlan0 power off
+}
+
+stop() {
+	killall kinetikos
+}
+
+case "$1" in 
+    start)
+       start
+       ;;
+    stop)
+       stop
+       ;;
+    restart)
+       stop
+       start
+       ;;
+    status)
+	   echo "not implemented"
+       ;;
+    *)
+       echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0 

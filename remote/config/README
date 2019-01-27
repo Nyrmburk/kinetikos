@@ -1,0 +1,10 @@
+initial steps:
+
+run raspi-config for the following options:
+	disable wait for network on boot
+	expand filesystem
+	enable ssh
+	enable camera
+	enable the serial interface with no serial login shell
+
+run config.sh myrobotname

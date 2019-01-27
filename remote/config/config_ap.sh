@@ -1,17 +1,28 @@
 #!/bin/bash
 
-# set up a second interface as JUST ap
-# iw dev wlan0 interface add wlan1 type __ap
+SSID=$1
+PSK=$2
+
+WLAN="wlan0"
+# set up simultaneous AP so internet and AP mode are active
+# doesn't work because dhcpcd craps out with the message:
+# "carrier lost" right as it gets an ip address. without an
+# ip address, hostpd can't give dhcp ranges to connections
+#iw dev wlan0 interface add wlan1 type __ap
+#WLAN="wlan1"
 
 # install required software
-apt install dnsmasq hostapd
+apt -y install dnsmasq hostapd
 
 # configure dhcpcd
 DHCPCD=$"/etc/dhcpcd.conf"
 mv -n $DHCPCD $DHCPCD.bak
 cp -a $DHCPCD.bak $DHCPCD
 echo "
-denyinterfaces wlan0
+#noarp
+interface $WLAN
+static ip_address=192.168.4.1/24
+nohook wpa_supplicant
 " >> $DHCPCD
 
 # configure network interfaces
@@ -19,13 +30,7 @@ INTERFACES=$"/etc/network/interfaces"
 mv -n $INTERFACES $INTERFACES.bak
 cp -a $INTERFACES.bak $INTERFACES
 echo "
-allow-hotplug wlan0
-iface wlan0 inet static
-    address 172.24.1.1
-    netmask 255.255.255.0
-    network 172.24.1.0
-    broadcast 172.24.1.255
-#    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+#allow-hotplug $WLAN
 " >> $INTERFACES
 
 # restart the dhcpcd service
@@ -35,13 +40,13 @@ service dhcpcd restart
 HOSTAPD=$"/etc/hostapd/hostapd.conf"
 echo "
 # This is the name of the WiFi interface we configured above
-interface=wlan0
+interface=$WLAN
 
 # Use the nl80211 driver with the brcmfmac driver
 driver=nl80211
 
 # This is the name of the network
-ssid=Pi3-AP
+ssid=$SSID
 
 # Use the 2.4GHz band
 hw_mode=g
@@ -74,7 +79,7 @@ wpa=2
 wpa_key_mgmt=WPA-PSK
 
 # The network passphrase
-wpa_passphrase=raspberry
+wpa_passphrase=$PSK
 
 # Use AES, instead of TKIP
 rsn_pairwise=CCMP
@@ -84,24 +89,21 @@ HOSTAPDDAEMON=$"/etc/default/hostapd"
 mv -n $HOSTAPDDAEMON $HOSTAPDDAEMON.bak
 cp -a $HOSTAPDDAEMON.bak $HOSTAPDDAEMON
 echo "
-service wpa_supplicant stop
 DAEMON_CONF='/etc/hostapd/hostapd.conf'
+
+# disable wifi power management
+#iwconfig $WLAN power off
 " >> $HOSTAPDDAEMON
 
 # configure dnsmasq
 DNSMASQ=$"/etc/dnsmasq.conf"
 mv -n $DNSMASQ $DNSMASQ.bak
 echo "
-interface=wlan0      # Use interface wlan0
-listen-address=172.24.1.1 # Explicitly specify the address to listen on
-bind-interfaces      # Bind to the interface to make sure we aren't sending things elsewhere
-server=8.8.8.8       # Forward DNS requests to Google DNS
-domain-needed        # Don't forward short names
-bogus-priv           # Never forward addresses in the non-routed address spaces.
-dhcp-range=172.24.1.50,172.24.1.150,12h # Assign IP addresses between 172.24.1.50 and 172.24.1.150 with a 12 hour lease time
-" > $DNSMASQ
+interface=$WLAN      # Use interface $WLAN
+dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h
+" >> $DNSMASQ
 
-service wpa_supplicant stop
+#systemctl disable wpa_supplicant
 
 service dnsmasq start
 service hostapd start
