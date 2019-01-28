@@ -19,7 +19,9 @@ DHCPCD=$"/etc/dhcpcd.conf"
 mv -n $DHCPCD $DHCPCD.bak
 cp -a $DHCPCD.bak $DHCPCD
 echo "
-#noarp
+#speed up dhcpcd by disabling arp checking
+noarp
+
 interface $WLAN
 static ip_address=192.168.4.1/24
 nohook wpa_supplicant
