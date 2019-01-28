@@ -32,11 +32,15 @@ SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(VENDOR) | grep -v
 OBJS = $(SRCS:%=$(OUT)/%.o)
 DEPS = $(OBJS:.o=.d)
 
+CONFIG_OUTS := $(shell find config/ -type f)
+CONFIG_OUTS := $(addprefix $(OUT)/,$(CONFIG_OUTS))
+
 REMOTE_OUTS := \
-	$(OUT)/$(REMOTE)/index.html \
-	$(OUT)/$(REMOTE)/min.js \
-	$(OUT)/$(REMOTE)/style.css \
-	$(OUT)/$(REMOTE)/favicon.png
+	index.html \
+	min.js \
+	style.css \
+	favicon.png
+REMOTE_OUTS := $(addprefix $(OUT)/$(REMOTE)/,$(REMOTE_OUTS))
 
 INC_DIRS := $(shell find -type d | grep -v $(BUILD_DIR) | grep -v $(VENDOR) | grep -v .git) $(VENDOR)/include
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -61,7 +65,7 @@ else ifeq ($(RELEASE),release)
 	CXXFLAGS += -Ofast
 endif
 
-default: vendor $(OUT)/$(EXECUTABLE) $(OUT)/config $(REMOTE_OUTS)
+default: vendor $(OUT)/$(EXECUTABLE) $(CONFIG_OUTS) $(REMOTE_OUTS)
 
 $(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so $(BIN)/libwiringPi.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
@@ -74,9 +78,9 @@ $(OUT)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBS) -c $< -o $@
 
-$(OUT)/config: config
+$(OUT)/config/%: config/%
 	@mkdir -p $(dir $@)
-	cp -r $< $@
+	cp $< $@
 
 %/libuWS.so:
 	$(MAKE) -B -C $(VENDOR)/uWebSockets \
@@ -95,22 +99,23 @@ $(OUT)/config: config
 	cp $(VENDOR)/wiringPi/wiringPi/libwiringPi.so.* $@
 
 JS ?= \
-	$(REMOTE)/_vendor/h264-live-player/vendor/dist/http-live-player.js \
-	$(REMOTE)/_vendor/three.js/build/three.js \
-	$(REMOTE)/_vendor/three.js/examples/js/WebGL.js \
-	$(REMOTE)/_vendor/stats.js/build/stats.min.js \
-	$(REMOTE)/_vendor/dat.gui/build/dat.gui.min.js \
-	$(REMOTE)/_vendor/THREE.MeshLine/src/THREE.MeshLine.js \
-	$(REMOTE)/_vendor/virtualjoystick.js/virtualjoystick.js \
-	$(REMOTE)/_vendor/reconnecting-websocket/reconnecting-websocket.js \
-	$(REMOTE)/js/dataview2.js \
-	$(REMOTE)/js/protocol.js \
-	$(REMOTE)/js/robotprotocol.js \
-	$(REMOTE)/js/robotgui.js \
-	$(REMOTE)/js/client.js \
-	$(REMOTE)/js/robot.js \
-	$(REMOTE)/js/renderer3d.js \
-	$(REMOTE)/js/main.js
+	_vendor/h264-live-player/vendor/dist/http-live-player.js \
+	_vendor/three.js/build/three.js \
+	_vendor/three.js/examples/js/WebGL.js \
+	_vendor/stats.js/build/stats.min.js \
+	_vendor/dat.gui/build/dat.gui.min.js \
+	_vendor/THREE.MeshLine/src/THREE.MeshLine.js \
+	_vendor/virtualjoystick.js/virtualjoystick.js \
+	_vendor/reconnecting-websocket/reconnecting-websocket.js \
+	js/dataview2.js \
+	js/protocol.js \
+	js/robotprotocol.js \
+	js/robotgui.js \
+	js/client.js \
+	js/robot.js \
+	js/renderer3d.js \
+	js/main.js
+JS := $(addprefix $(REMOTE)/,$(JS))
 
 
 $(OUT)/%/min.js: $(JS)
