@@ -14,6 +14,11 @@
 #ifndef H264SERVER_H
 #define H264SERVER_H
 
+#include <vector>
+#include <uWS/uWS.h>
+
+#define BLOCK_SIZE 4096
+
 class H264Server {
 public:
     H264Server();
@@ -21,7 +26,11 @@ public:
     
     void run();
 private:
-
+uWS::Hub hub;
+FILE* camera;
+std::vector<char> buffer;
+int index = 0;
+uint32_t history = 0xFFFFFFFF;
 };
 
 #endif /* H264SERVER_H */

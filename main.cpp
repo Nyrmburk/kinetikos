@@ -12,6 +12,7 @@
 #include "robot/Robot.h"
 #include "robot/Config.h"
 #include "network/Server.h"
+#include "network/H264Server.h"
 #include "network/RobotProtocol.h"
 #include "animation/AnimationJson.h"
 #include "animation/RobotClip.h"
@@ -27,6 +28,18 @@ int main(int argc, char** argv) {
     cout << "loading robot config" << endl;
     Config config(origin() + "/config/robot.json");
     Robot robot(config);
+
+    int childpid = fork();
+    if (childpid < 0) {
+        cout << "failure forking, no livestream server started" << endl;
+    } else if (childpid == 0) {
+        // child process
+        cout << "starting livestream server" << endl;
+        H264Server livestream;
+        livestream.run();
+        cout << "livestream server died" << endl;
+        return 0;
+    }
 
     int fd = PiPololuMotorControl::getSerial();
     if (fd >= 0) {
@@ -66,7 +79,7 @@ int main(int argc, char** argv) {
     JoystickPlan plan(500, 10, 3, 0);
     robot.setMotionPlan(&plan);
 
-    cout << "initializing server" << endl;
+    cout << "initializing robot server" << endl;
     Server server(robot);
     server.joystickPlan = &plan;
 
@@ -108,7 +121,7 @@ int main(int argc, char** argv) {
     }, 1000);
     */
 
-    cout << "starting server" << endl;
+    cout << "starting robot server" << endl;
     server.run();
     return 0;
 }

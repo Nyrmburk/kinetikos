@@ -36,7 +36,7 @@ window.onload = function() {
 	streamPlayer = new WSAvcPlayer(videoCanvas, "webgl");
 	//var streamSocket = new WebSocket(uri, "h264");
 	//streamPlayer.connect(videoSocket);
-	//streamPlayer.connect(getUri(3000));
+	streamPlayer.connect(getUri(8081));
 
 	gui = new RobotGui();
 
