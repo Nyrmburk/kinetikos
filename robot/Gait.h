@@ -9,8 +9,8 @@ public:
     float duration;
 
     bool isGrounded(float cursor) {
-        cursor = fmod(cursor, 1);
-        return strike <= cursor && cursor < (strike + duration);
+        cursor = fmod(cursor + strike, 1);
+        return 0 <= cursor && cursor < duration;
     }
 };
 
