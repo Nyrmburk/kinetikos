@@ -22,7 +22,7 @@ public:
         bodyChannel = new Mat4Channel;
         Mat4 removeMe;
         identitym4(&removeMe);
-        removeMe.m[14] = 20;
+        removeMe.m[14] = 40;
         Tween<Mat4> heck(removeMe, 0, easeNone);
         bodyChannel->insertTween(heck);
         
@@ -54,8 +54,6 @@ public:
 
     void sim(float delta) {
         float time = getTime();
-        // calculate per-foot speed
-
         // feet from past sim and future sim to calculate gait interval from greatest foot speed
         // ws means worldspace
         Vec3 wsFeetThen[footCount];
@@ -75,10 +73,8 @@ public:
         // get foot position at time now
         for (int i = 0; i < footCount; i++) {
             multm4v3(&orientationNow, &robot->getFeetHome()[i], 1, &wsFeetFuture[i]);
+            //setv3(&wsFeetFuture[i], &stepsNow[i].wsPosition);
         }
-
-        // clearing old plans
-        clearUsedPlans(time);
 
         // clearing invalid predictions
         float voidTime = time - delta;
@@ -95,14 +91,15 @@ public:
         bool wasGroundedNow[footCount];
         bool wasGrounded[footCount];
         for (int i = 0; i < footCount; i++) {
-            wasGroundedNow[i] = isGrounded(i, steps[i].front(), cursor);
+            wasGroundedNow[i] = isGrounded(i, steps[i].front(), gaitCursor);
+            //wasGrounded[i] = gait[i].isGrounded(gaitCursor);
             wasGrounded[i] = wasGroundedNow[i];
         }
 
+        float lastFuture = 0;
         do {
+            lastFuture = future;
             future += delta;
-
-            // TODO get foot position in the future
 
             // calculate future orientation
             robot->getMotionPlan()->orientationAt(future, &orientationFuture);
@@ -112,12 +109,6 @@ public:
                 multm4v3(&orientationFuture, &robot->getFeetHome()[i], 1, &wsFeetFuture[i]);
             }
 
-            // compare foot positions to get distance traveled
-            float footSpeed = getFootSpeed(wsFeetThen, wsFeetFuture, delta);
-
-            // calculate step distance
-            float stepDistance = footSpeed;
-
             // increment gait cursor
             cursor += delta;
 
@@ -125,10 +116,12 @@ public:
             Vec3 diff;
             Mat4 bodyOrientationFuture;
             bodyChannel->act(time + future, bodyOrientationFuture);
-            int abort = -1;
-            StepPlan stepsNow[footCount];
+            int abort = 0;
+            StepPlan oldSteps[footCount];
+            bool oldGrounded[footCount];
             for (int i = 0; i < footCount; i++) {
-                stepsNow[i] = steps[i].back();
+                oldSteps[i] = steps[i].back();
+                oldGrounded[i] = wasGrounded[i];
             }
             for (int i = 0; i < footCount; i++) {
                 StepPlan& stepFuture = steps[i].back();
@@ -154,7 +147,7 @@ public:
                             angle = min(angle, fabs(anglev3(&diff, &footDiff)));
                             if (distance < footSeparation) {
                                 if (angle < M_PI_2) {
-                                    abort = i;
+                                    abort = 1;
                                     break;
                                 } else {
                                     multiplyv3s(&footDiff, -1 / distance, &footDiff);
@@ -162,13 +155,13 @@ public:
                                 }
                             }
                         }
-                        //if (abort > -1) {
-                        //    break;
-                        //}
+                        if (abort) {
+                            break;
+                        }
                     }
 
                     if (distanceFromHome(stepFuture, &robot->getFeetHome()[i]) > 50) {
-                        abort = i;
+                        abort = 2;
                         break;
                     }
 
@@ -185,7 +178,7 @@ public:
                             addv3(&stepFuture.wsPosition, &diff, &stepFuture.wsPosition);
                             // TODO snap the foot to the world position
                         } else {
-                            abort = i;
+                            abort = 3;
                             break;
                         }
                     }
@@ -200,27 +193,27 @@ public:
                             subtractv3(&stepFuture.wsPosition, &diff, &stepFuture.wsPosition);
                             // TODO snap the foot to the world position
                         } else {
-                            abort = i;
+                            abort = 4;
                             break;
                         }
                     }
 
                     if (liftCollision && landCollision) {
-                        abort = i;
+                        abort = 5;
                         break;
                     }
                 }
             }
 
-            if (abort > -1) {
+            if (abort) {
                 for (int i = 0; i < footCount; i++) {
-                    steps[i].back() = stepsNow[i];
-                }
-                future -= delta;
+                    steps[i].back() = oldSteps[i];
 
-                float cursorMod = fmod(cursor, 1.0);
-                float offset = (gait[abort].strike + gait[abort].duration) - cursorMod;
-                cursorTimes[time + future] = cursor + offset;
+                    //TODO possibly reinstate this when the original bug is found.
+                    //setv3(&wsFeetFuture[i], &wsFeetThen[i]); // reset future to previous
+                    wasGrounded[i] = oldGrounded[i];
+                }
+                future = lastFuture;
             }
 
             // check if foot landed?
@@ -231,6 +224,9 @@ public:
                     steps[i].emplace_back();
                     steps[i].back().land(time + future, &orientationFuture, &invOrientationFuture);
                     multm4v3(&orientationFuture, &robot->getFeetHome()[i], 1, &steps[i].back().wsPosition);
+                    cursorTimes[time + future] = cursor;
+                } else if (wasGrounded[i] > grounded) {
+                    // lifted
                     cursorTimes[time + future] = cursor;
                 }
                 wasGrounded[i] = grounded;
@@ -268,7 +264,7 @@ public:
             } else {
                 // current step is now lifted
                 // current lift -> next land
-                Vec3 handle = {0, 0, 20};
+                Vec3 handle = {0, 0, 50};
 
                 // current step lift
                 Bezier3::Node startNode;
@@ -286,8 +282,10 @@ public:
             }
         }
 
-        float oldCursor = gaitCursor;
         gaitCursor = getCursor(gaitCursor, delta, time, 0);
+
+        // clearing old plans
+        clearUsedPlans(time);
 
         for (int i = 0; i < footCount; i++) {
             bool grounded = isGrounded(i, steps[i].front(), gaitCursor);
@@ -416,11 +414,12 @@ private:
     }
 
     void clearFutureVoidedPlans(float voidTime) {
-        cursorTimes.erase(cursorTimes.upper_bound(voidTime), cursorTimes.end());
 
         for (int i = 0; i < footCount; i++) {
             for (auto it = steps[i].begin(); it != steps[i].end(); ++it) {
-                if (voidTime <= (*it).liftTime) {
+                if (voidTime <= (*it).landTime) {
+                    cursorTimes.erase(cursorTimes.upper_bound((*it).liftTime),
+                            cursorTimes.end());
                     steps[i].erase(it, steps[i].end());
                     break;
                 }
@@ -429,11 +428,11 @@ private:
     }
 
     void clearUsedPlans(float timeNow) {
-        cursorTimes.erase(cursorTimes.begin(), cursorTimes.lower_bound(timeNow));
-
         for (int i = 0; i < footCount; i++) {
             for (auto it = steps[i].begin(); it != steps[i].end(); ++it) {
-                if ((*it).landTime <= timeNow) {
+                if ((*it).liftTime <= timeNow) {
+                    cursorTimes.erase(cursorTimes.begin(),
+                            cursorTimes.lower_bound((*it).landTime));
                     steps[i].erase(steps[i].begin(), it);
                     break;
                 }
