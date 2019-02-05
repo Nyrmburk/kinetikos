@@ -12,7 +12,7 @@ using namespace uWS;
 
 H264Server::H264Server() {
     camera = popen(
-        "raspivid -t 0 -o - -hf -vf -w 640 -h 480 -fps 25 -pf baseline -ih -fl", "r");
+        "raspivid -t 0 -o - -w 640 -h 480 -fps 25 -pf baseline -ih -fl", "r");
 
     if (!camera) {
         cout << "could not open camera. livestream server exiting." << endl;
