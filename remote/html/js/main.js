@@ -113,8 +113,8 @@ function keyChange(code, value) {
 			break;
 	}
 	client.sendJoystick(
-			moves.right - moves.left, 
-			moves.forward - moves.backward, 
+			moves.right - moves.left,
+			moves.forward - moves.backward,
 			moves.rotateRight - moves.rotateLeft, 0);
 	console.log(moves.forward - moves.backward);
 }
