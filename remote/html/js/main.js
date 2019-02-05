@@ -28,6 +28,9 @@ window.onload = function() {
 	allContainer.addEventListener("mouseup", joystickEnd);
 	allContainer.addEventListener("touchend", joystickEnd);
 
+	document.addEventListener('keydown', keyDown);
+	document.addEventListener('keyup', keyUp);
+
 	var videostreamDiv = document.getElementById("videostream");
 	var videoCanvas = document.createElement("canvas");
 	videoCanvas.width = 640;
@@ -63,12 +66,10 @@ function render() {
 var current = false;
 function joystickStart() {
 	current = true;
-	console.log("start");
 }
 
 function joystickMove() {
 	if (current) {
-		console.log("move");
 		var u = joystick.deltaX() / joystick._stickRadius;
 		var y = -joystick.deltaY() / joystick._stickRadius;
 
@@ -78,6 +79,52 @@ function joystickMove() {
 
 function joystickEnd() {
 	current = false;
-	console.log("end");
 	client.sendJoystick(0, 0, 0, 0);
+}
+
+var moves = {
+	forward: 0,
+	backward: 0,
+	left: 0,
+	right: 0,
+	rotateLeft: 0,
+	rotateRight: 0
+}
+
+function keyChange(code, value) {
+	switch (code) {
+		case 87: // W
+			moves.forward = value;
+			break;
+		case 83: // S
+			moves.backward = value;
+			break;
+		case 65: // A
+			moves.left = value;
+			break;
+		case 68: // D
+			moves.right = value;
+			break;
+		case 81: // Q
+			moves.rotateLeft = value;
+			break;
+		case 69: // E
+			moves.rotateRight = value;
+			break;
+	}
+	client.sendJoystick(
+			moves.right - moves.left, 
+			moves.forward - moves.backward, 
+			moves.rotateRight - moves.rotateLeft, 0);
+	console.log(moves.forward - moves.backward);
+}
+
+function keyDown(event) {
+	console.log('key ' + event.keyCode + ' down');
+	keyChange(event.keyCode, 1);
+}
+
+function keyUp(event) {
+	console.log('key ' + event.keyCode + ' up');
+	keyChange(event.keyCode, 0);
 }

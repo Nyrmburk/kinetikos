@@ -11,7 +11,7 @@ public:
     RobotProtocol(Robot& robot) : robot(robot) {}
 
     Robot& robot;
-    JoystickPlan* joystickPlan;
+    JoystickPlan* joystickPlan = nullptr;
 
     // control
     void controlBodyOrientation(T& remote, uint16_t opcode, DataView& data);
