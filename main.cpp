@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     robot.setFeetHome(feetHome);
     robot.setAnimation(&home);
     
-    AnimationJson demoAnimation(origin() + "/config/animations/demo.json");
+    AnimationJson demoAnimation(origin() + "/config/animations/startup.json");
     RobotClip demo = demoAnimation.getAnimation();
     demo.setTargets(robot.getBodyOrientation(), robot.getFeet());
     robot.setAnimation(&demo);
@@ -74,31 +74,39 @@ int main(int argc, char** argv) {
     //config.getGait(gait, "ripple");
     WalkingRobotClip walk(&robot, gait);
     walk.setTargets(robot.getBodyOrientation(), robot.getFeet());
-    robot.setAnimation(&walk);
 
-    JoystickPlan plan(500, 10, 3, 0);
+    JoystickPlan plan(300, 10, 2, 0);
     robot.setMotionPlan(&plan);
 
     cout << "initializing robot server" << endl;
     Server server(robot);
-    server.joystickPlan = &plan;
+
+    server.addTimer([&](int delta) {
+        robot.setAnimation(&walk);
+        server.joystickPlan = &plan;
+    }, 5000, 0, 1);
 
     // simulate
     server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
         robot.simulationStep(fDelta);
         walk.sim(fDelta);
-    }, 20);
+    }, 0, 20);
 
     // animate
     server.addTimer([&](int delta) {
         float fDelta = ((float) delta) / 1000;
         robot.animationStep(fDelta);
+        for (int i = 0; i < legsCount; i++) {
+//            robot.getJoints()[i].coxa = 0.5;
+//            robot.getJoints()[i].femur = i < 3;
+//            robot.getJoints()[i].tibia = 0.5;
+        }
         MotorControl* motorControl = robot.getMotorControl();
         if (motorControl) {
             motorControl->setMotors(robot.getJoints(), legsCount);
         }
-    }, 20);
+    }, 0, 20);
 
     // server publish data to clients
     server.addTimer([&](int delta) {
@@ -106,7 +114,7 @@ int main(int argc, char** argv) {
         server.publishJoints();
         server.publishFeet();
         server.publishOrientation();
-    }, 20);
+    }, 0, 20);
 
     /*
     unsigned long long lastBytesRead = 0;
@@ -118,7 +126,7 @@ int main(int argc, char** argv) {
                 (server.getTotalBytesWritten() - lastBytesWritten) / 1024 << " kBps" << endl;
         lastBytesRead = server.getTotalBytesRead();
         lastBytesWritten = server.getTotalBytesWritten();
-    }, 1000);
+    }, 1000, 1000);
     */
 
     cout << "starting robot server" << endl;

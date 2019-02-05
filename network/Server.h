@@ -71,24 +71,36 @@ public:
         }
     }
 
-    void addTimer(std::function<void(int)> step, int millis) {
+    void addTimer(std::function<void(int)> step, int delay, int repeat, int times = -1) {
         // struct for the user data in the time
         struct TimerData {
+            uS::Timer *timer;
             std::function<void(int)> step;
-            int millis;
+            int repeat;
+            int times;
         };
-
-        TimerData* data = new TimerData();
-        data->step = step;
-        data->millis = millis;
 
         // set up the timer loop
         uS::Timer *timer = new uS::Timer(h.getLoop());
+
+        TimerData* data = new TimerData();
+        data->timer = timer;
+        data->step = step;
+        data->repeat = repeat;
+        data->times = times;
         timer->setData(data);
+
         timer->start([](uS::Timer *timer) {
             TimerData* data = (TimerData*) timer->getData();
-            data->step(data->millis);
-        }, 0, millis);
+            if (data->times > 0) {
+                data->times--;
+            } else if (data->times == 0) {
+                data->timer->stop();
+                data->timer->close();
+                return;
+            }
+            data->step(data->repeat);
+        }, delay, repeat);
     }
 
     unsigned long long getTotalBytesRead() {
