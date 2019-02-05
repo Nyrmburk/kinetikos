@@ -55,6 +55,7 @@ public:
         bone.length = docBone["length"].GetDouble();
         bone.angle = docBone["angle"].GetDouble();
         bone.range = docBone["range"].GetDouble();
+        bone.angle += docBone["trim"].GetDouble();
     }
 
     void getTrim(Value& docTrim, short trim[]) {
