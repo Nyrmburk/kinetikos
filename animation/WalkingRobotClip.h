@@ -414,12 +414,10 @@ private:
     }
 
     void clearFutureVoidedPlans(float voidTime) {
-
+        cursorTimes.erase(cursorTimes.upper_bound(voidTime), cursorTimes.end());
         for (int i = 0; i < footCount; i++) {
             for (auto it = steps[i].begin(); it != steps[i].end(); ++it) {
                 if (voidTime <= (*it).landTime) {
-                    cursorTimes.erase(cursorTimes.upper_bound((*it).liftTime),
-                            cursorTimes.end());
                     steps[i].erase(it, steps[i].end());
                     break;
                 }
@@ -428,26 +426,15 @@ private:
     }
 
     void clearUsedPlans(float timeNow) {
+        cursorTimes.erase(cursorTimes.begin(), cursorTimes.lower_bound(timeNow));
         for (int i = 0; i < footCount; i++) {
             for (auto it = steps[i].begin(); it != steps[i].end(); ++it) {
                 if ((*it).liftTime <= timeNow) {
-                    cursorTimes.erase(cursorTimes.begin(),
-                            cursorTimes.lower_bound((*it).landTime));
                     steps[i].erase(steps[i].begin(), it);
                     break;
                 }
             }
         }
-    }
-
-    float getFootSpeed(Vec3* feetStart, Vec3* feetEnd, float delta) {
-        float footSpeed = 0;
-        for (int i = 0; i < footCount; i++) {
-            float distance = distancev3(&feetStart[i], &feetEnd[i]);
-            footSpeed = std::max(footSpeed, distance);
-        }
-        footSpeed /= delta;
-        return footSpeed;
     }
 };
 

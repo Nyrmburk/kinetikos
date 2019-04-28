@@ -150,7 +150,7 @@ memcheck: run
 
 .PHONY: push
 push: default
-	cd $(OUT) && rsync -avR `find -type f -not -name "*.[do]"` kinetikos@$(HOST):
+	cd $(OUT) && rsync --ignore-times -avR `find -type f -not -name "*.[do]"` kinetikos@$(HOST):
 
 .PHONY: clean
 clean:
