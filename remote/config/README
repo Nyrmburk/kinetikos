@@ -7,4 +7,6 @@ run raspi-config for the following options:
 	enable camera
 	enable the serial interface with no serial login shell
 
-run config.sh myrobotname
+
+run the following command locally, not over ssh:
+sudo config.sh myrobotname
