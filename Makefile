@@ -7,17 +7,15 @@ REMOTE ?= remote/html
 REMOTE_VENDOR ?= $(REMOTE)/_vendor
 INCLUDE := $(VENDOR)/include
 
-TOOLCHAIN_DIR ?= ../toolchain
+TOOLCHAIN_DIR ?= $(shell pwd)/_toolchain
 
 TOOLCHAIN ?= $(shell $(CC) -dumpmachine)
 TOOLCHAIN ?= $(shell $(CXX) -dumpmachine)
 
-TARGET ?= local
-ifeq ($(TARGET),arm)
-$(eval ARMTC = $(shell pwd)/$(TOOLCHAIN_DIR)/arm/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64)
-	CC = $(ARMTC)/bin/arm-linux-gnueabihf-gcc
-	CXX = $(ARMTC)/bin/arm-linux-gnueabihf-g++
-	CPATH = $(ARMTC)/arm-linux-gnueabihf/libc/usr/include:$(ARMTC)/arm-linux-gnueabihf/libc/include/arm-linux-gnyeabihf
+ifdef TARGET
+    CC = $(TOOLCHAIN_DIR)/$(TARGET)/cc
+    CXX = $(TOOLCHAIN_DIR)/$(TARGET)/cxx
+    CPATH = $(shell cat $(TOOLCHAIN_DIR)/$(TARGET)/cpath)
 endif
 
 RELEASE ?= debug
@@ -28,7 +26,7 @@ RUNNER :=
 
 ARGS :=
 
-SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(VENDOR) | grep -v $(TOOLCHAIN))
+SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(VENDOR) | grep -v $(TOOLCHAIN_DIR))
 OBJS = $(SRCS:%=$(OUT)/%.o)
 DEPS = $(OBJS:.o=.d)
 
@@ -42,7 +40,7 @@ REMOTE_OUTS := \
 	favicon.png
 REMOTE_OUTS := $(addprefix $(OUT)/$(REMOTE)/,$(REMOTE_OUTS))
 
-INC_DIRS := $(shell find -type d | grep -v $(BUILD_DIR) | grep -v $(VENDOR) | grep -v .git) $(VENDOR)/include
+INC_DIRS := $(shell find -type d | grep -v $(BUILD_DIR) | grep -v $(VENDOR) | grep -v $(TOOLCHAIN_DIR) | grep -v .git) $(VENDOR)/include
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
@@ -150,7 +148,7 @@ memcheck: run
 
 .PHONY: push
 push: default
-	cd $(OUT) && rsync --ignore-times -avR `find -type f -not -name "*.[do]"` kinetikos@$(HOST):
+	cd $(OUT) && rsync --ignore-times -avR `find -type f -not -name "*.[do]"` $(HOST):$(DEST)
 
 .PHONY: clean
 clean:
