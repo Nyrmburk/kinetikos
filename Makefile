@@ -88,23 +88,7 @@ $(OUT)/config/%: config/%
 	mkdir -p $*
 	mv $(VENDOR)/uWebSockets/libuWS.so $*/
 
-JS ?= \
-	$(VENDOR)/h264-live-player/vendor/dist/http-live-player.js \
-	$(VENDOR)/three.js/build/three.js \
-	$(VENDOR)/three.js/examples/js/WebGL.js \
-	$(VENDOR)/stats.js/build/stats.min.js \
-	$(VENDOR)/dat.gui/build/dat.gui.min.js \
-	$(VENDOR)/THREE.MeshLine/src/THREE.MeshLine.js \
-	$(VENDOR)/virtualjoystick.js/virtualjoystick.js \
-	$(VENDOR)/reconnecting-websocket/reconnecting-websocket.js \
-	js/dataview2.js \
-	js/protocol.js \
-	js/robotprotocol.js \
-	js/robotgui.js \
-	js/client.js \
-	js/robot.js \
-	js/renderer3d.js \
-	js/main.js
+JS := $(shell grep -oP "<script.*?src=\"\K.*?(?=\">)" $(REMOTE)/index.html)
 JS := $(addprefix $(REMOTE)/,$(JS))
 
 $(OUT)/%/min.js: $(JS)
