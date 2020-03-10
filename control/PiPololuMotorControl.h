@@ -16,9 +16,6 @@
 
 #include "MotorControl.h"
 
-#include <wiringPi/wiringPi.h>
-#include <wiringPi/wiringSerial.h>
-    
 #define DEVICE "/dev/ttyAMA0"
 #define SERIAL_TX 15
 #define SERIAL_RX 16

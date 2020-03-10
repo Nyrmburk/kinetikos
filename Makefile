@@ -47,7 +47,7 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 LIB_NAMES := libuWS.so
 BIN ?= $(OUT)/bin
 LIBRARIES = $(LIB_NAMES:%=$(OUT)/%)
-LIBS ?= -L$(BIN) -luWS -lwiringPi -lm -lz -lssl -lcrypto -lpthread -lrt -lcrypt
+LIBS ?= -L$(BIN) -luWS -lm -lz -lssl -lcrypto -lpthread -lrt -lcrypt
 CFLAGS ?= -std=c99
 CXXFLAGS ?= -std=c++11
 LDFLAGS ?= -Wl,-rpath,'$$ORIGIN/bin'
@@ -65,7 +65,7 @@ endif
 
 default: vendor $(OUT)/$(EXECUTABLE) $(CONFIG_OUTS) $(REMOTE_OUTS)
 
-$(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so $(BIN)/libwiringPi.so
+$(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
 
 $(OUT)/%.c.o: %.c
@@ -87,14 +87,6 @@ $(OUT)/config/%: config/%
 		CPATH=$(CPATH)
 	mkdir -p $*
 	cp $(VENDOR)/uWebSockets/libuWS.so $*/
-
-%/libwiringPi.so:
-	$(MAKE) -B -C $(VENDOR)/wiringPi/wiringPi \
-		CC=$(CC) \
-		CXX=$(CXX) \
-		CPATH=$(CPATH)
-	mkdir -p $*
-	cp $(VENDOR)/wiringPi/wiringPi/libwiringPi.so.* $@
 
 JS ?= \
 	_vendor/h264-live-player/vendor/dist/http-live-player.js \
@@ -162,7 +154,6 @@ clean_vendor:
 .PHONY: vendor
 vendor: \
 	$(VENDOR)/uWebSockets \
-	$(VENDOR)/wiringPi \
 	$(VENDOR)/rapidjson \
 	$(REMOTE_VENDOR)/three.js \
 	$(REMOTE_VENDOR)/THREE.MeshLine \
@@ -177,11 +168,6 @@ $(VENDOR)/uWebSockets:
 	cd $@ && git checkout origin/v0.14
 	mkdir -p $(INCLUDE)/uWS
 	cp -l $@/src/*.h $(INCLUDE)/uWS
-
-$(VENDOR)/wiringPi:
-	git clone --depth=1 git://git.drogon.net/wiringPi $@
-	mkdir -p $(INCLUDE)/wiringPi
-	cp -l $@/wiringPi/*.h $(VENDOR)/include/wiringPi
 
 $(VENDOR)/flatbuffers:
 	git clone --depth=1 https://github.com/google/flatbuffers.git $@
