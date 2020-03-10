@@ -2,9 +2,8 @@ EXECUTABLE ?= kinetikos
 
 BUILD_DIR ?= ./_build
  
-VENDOR ?= ./_vendor
+VENDOR ?= ./vendor
 REMOTE ?= remote/html
-REMOTE_VENDOR ?= $(REMOTE)/_vendor
 INCLUDE := $(VENDOR)/include
 
 TOOLCHAIN_DIR ?= $(shell pwd)/_toolchain
@@ -63,7 +62,7 @@ else ifeq ($(RELEASE),release)
 	CXXFLAGS += -Ofast
 endif
 
-default: vendor $(OUT)/$(EXECUTABLE) $(CONFIG_OUTS) $(REMOTE_OUTS)
+default: $(OUT)/$(EXECUTABLE) $(CONFIG_OUTS) $(REMOTE_OUTS)
 
 $(OUT)/$(EXECUTABLE): $(OBJS) $(BIN)/libuWS.so
 	$(CXX) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
@@ -86,17 +85,17 @@ $(OUT)/config/%: config/%
 		CXX=$(CXX) \
 		CPATH=$(CPATH)
 	mkdir -p $*
-	cp $(VENDOR)/uWebSockets/libuWS.so $*/
+	mv $(VENDOR)/uWebSockets/libuWS.so $*/
 
 JS ?= \
-	_vendor/h264-live-player/vendor/dist/http-live-player.js \
-	_vendor/three.js/build/three.js \
-	_vendor/three.js/examples/js/WebGL.js \
-	_vendor/stats.js/build/stats.min.js \
-	_vendor/dat.gui/build/dat.gui.min.js \
-	_vendor/THREE.MeshLine/src/THREE.MeshLine.js \
-	_vendor/virtualjoystick.js/virtualjoystick.js \
-	_vendor/reconnecting-websocket/reconnecting-websocket.js \
+	$(VENDOR)/h264-live-player/vendor/dist/http-live-player.js \
+	$(VENDOR)/three.js/build/three.js \
+	$(VENDOR)/three.js/examples/js/WebGL.js \
+	$(VENDOR)/stats.js/build/stats.min.js \
+	$(VENDOR)/dat.gui/build/dat.gui.min.js \
+	$(VENDOR)/THREE.MeshLine/src/THREE.MeshLine.js \
+	$(VENDOR)/virtualjoystick.js/virtualjoystick.js \
+	$(VENDOR)/reconnecting-websocket/reconnecting-websocket.js \
 	js/dataview2.js \
 	js/protocol.js \
 	js/robotprotocol.js \
@@ -106,7 +105,6 @@ JS ?= \
 	js/renderer3d.js \
 	js/main.js
 JS := $(addprefix $(REMOTE)/,$(JS))
-
 
 $(OUT)/%/min.js: $(JS)
 	@mkdir -p $(dir $@)
@@ -145,58 +143,4 @@ push: default
 .PHONY: clean
 clean:
 	$(RM) -r $(BUILD_DIR)
-
-.PHONY: clean_vendor
-clean_vendor:
-	$(RM) -r $(VENDOR)
-	$(RM) -r $(REMOTE_VENDOR)
-
-.PHONY: vendor
-vendor: \
-	$(VENDOR)/uWebSockets \
-	$(VENDOR)/rapidjson \
-	$(REMOTE_VENDOR)/three.js \
-	$(REMOTE_VENDOR)/THREE.MeshLine \
-	$(REMOTE_VENDOR)/virtualjoystick.js \
-	$(REMOTE_VENDOR)/h264-live-player \
-	$(REMOTE_VENDOR)/dat.gui \
-	$(REMOTE_VENDOR)/stats.js \
-	$(REMOTE_VENDOR)/reconnecting-websocket \
-
-$(VENDOR)/uWebSockets:
-	git clone https://github.com/uNetworking/uWebSockets.git $@
-	cd $@ && git checkout origin/v0.14
-	mkdir -p $(INCLUDE)/uWS
-	cp -l $@/src/*.h $(INCLUDE)/uWS
-
-$(VENDOR)/flatbuffers:
-	git clone --depth=1 https://github.com/google/flatbuffers.git $@
-	cd $@ && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make
-	cp -l -r $@/include/flatbuffers $(VENDOR)/include/
-	#cp -l -r $@/js $(VENDOR)/js
-
-$(VENDOR)/rapidjson:
-	git clone --depth=1 https://github.com/Tencent/rapidjson.git $@
-	cp -l -r $@/include/ $(VENDOR)/
-
-$(REMOTE_VENDOR)/three.js:
-	git clone --depth=1 https://github.com/mrdoob/three.js.git $@
-
-$(REMOTE_VENDOR)/THREE.MeshLine:
-	git clone --depth=1 https://github.com/spite/THREE.MeshLine.git $@
-
-$(REMOTE_VENDOR)/virtualjoystick.js:
-	git clone --depth=1 https://github.com/jeromeetienne/virtualjoystick.js.git $@
-
-$(REMOTE_VENDOR)/h264-live-player:
-	git clone --depth=1 https://github.com/131/h264-live-player.git $@
-
-$(REMOTE_VENDOR)/dat.gui:
-	git clone --depth=1 https://github.com/dataarts/dat.gui.git $@
-
-$(REMOTE_VENDOR)/stats.js:
-	git clone --depth=1 https://github.com/mrdoob/stats.js.git $@
-
-$(REMOTE_VENDOR)/reconnecting-websocket:
-	git clone --depth=1 https://github.com/joewalnes/reconnecting-websocket.git $@
 

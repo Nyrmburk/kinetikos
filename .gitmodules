@@ -1,0 +1,28 @@
+[submodule "_vendor/rapidjson"]
+	path = vendor/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
+[submodule "_vendor/uWebSockets"]
+	path = vendor/uWebSockets
+	url = https://github.com/uNetworking/uWebSockets.git
+	branch = v0.14
+[submodule "remote/html/_vendor/three.js"]
+	path = remote/html/vendor/three.js
+	url = https://github.com/mrdoob/three.js.git
+[submodule "remote/html/_vendor/THREE.MeshLine"]
+	path = remote/html/vendor/THREE.MeshLine
+	url = https://github.com/spite/THREE.MeshLine.git
+[submodule "remote/html/_vendor/virtualjoystick.js"]
+	path = remote/html/vendor/virtualjoystick.js
+	url = https://github.com/jeromeetienne/virtualjoystick.js.git
+[submodule "remote/html/_vendor/h264-live-player"]
+	path = remote/html/vendor/h264-live-player
+	url = https://github.com/131/h264-live-player.git
+[submodule "remote/html/_vendor/dat.gui"]
+	path = remote/html/vendor/dat.gui
+	url = https://github.com/dataarts/dat.gui.git
+[submodule "remote/html/_vendor/stats.js"]
+	path = remote/html/vendor/stats.js
+	url = https://github.com/mrdoob/stats.js.git
+[submodule "remote/html/_vendor/reconnecting-websocket"]
+	path = remote/html/vendor/reconnecting-websocket
+	url = https://github.com/joewalnes/reconnecting-websocket.git

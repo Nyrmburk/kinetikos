@@ -1,7 +1,7 @@
 class Renderer3d {
 	constructor(container, robot) {
-		if (!WEBGL.isWebGLAvailable()) {
-			var warning = WEBGL.getWebGLErrorMessage();
+		if (!THREE.WEBGL.isWebGLAvailable()) {
+			var warning = THREE.WEBGL.getWebGLErrorMessage();
 			// document.getElementById('container').appendChild(warning);
 			alert("WebGL not available");
 			throw new Error("WebGL not available");
