@@ -1,7 +1,8 @@
 EXECUTABLE ?= kinetikos
 
 BUILD_DIR ?= ./_build
- 
+
+SOURCE ?= source
 VENDOR ?= ./vendor
 REMOTE ?= remote/html
 INCLUDE := $(VENDOR)/include
@@ -25,7 +26,7 @@ RUNNER :=
 
 ARGS :=
 
-SRCS := $(shell find -name "*.cpp" -or -name "*.c" | grep -v $(VENDOR) | grep -v $(TOOLCHAIN_DIR))
+SRCS := $(shell find $(SOURCE) -name "*.cpp" -or -name "*.c")
 OBJS = $(SRCS:%=$(OUT)/%.o)
 DEPS = $(OBJS:.o=.d)
 
@@ -39,7 +40,7 @@ REMOTE_OUTS := \
 	favicon.png
 REMOTE_OUTS := $(addprefix $(OUT)/$(REMOTE)/,$(REMOTE_OUTS))
 
-INC_DIRS := $(shell find -type d | grep -v $(BUILD_DIR) | grep -v $(VENDOR) | grep -v $(TOOLCHAIN_DIR) | grep -v .git) $(VENDOR)/include
+INC_DIRS := $(shell find $(SOURCE) -type d) $(VENDOR)/include
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
